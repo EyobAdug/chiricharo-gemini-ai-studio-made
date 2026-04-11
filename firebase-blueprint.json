@@ -1,0 +1,103 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the Chiricharo platform (Admin, Seller, or Buyer).",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "seller", "buyer"] },
+        "language": { "type": "string", "enum": ["en", "am"] },
+        "sellerInfo": {
+          "type": "object",
+          "description": "Additional info for sellers",
+          "properties": {
+            "address": { "type": "string" },
+            "phone": { "type": "string" },
+            "verificationDetails": { "type": "string" },
+            "status": { "type": "string", "enum": ["pending", "approved", "rejected"] }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "name", "role", "createdAt"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "A product listed by a seller or admin.",
+      "type": "object",
+      "properties": {
+        "sellerId": { "type": "string", "description": "UID of the seller" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number", "description": "Price in ETB" },
+        "stock": { "type": "number" },
+        "category": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sellerId", "name", "description", "price", "stock", "category", "status", "createdAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "An order placed by a buyer.",
+      "type": "object",
+      "properties": {
+        "buyerId": { "type": "string", "description": "UID of the buyer" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "sellerId": { "type": "string" },
+              "quantity": { "type": "number" },
+              "price": { "type": "number" },
+              "status": { "type": "string", "enum": ["pending", "ready", "cancelled"] }
+            },
+            "required": ["productId", "sellerId", "quantity", "price", "status"]
+          }
+        },
+        "totalAmount": { "type": "number", "description": "Total amount in ETB" },
+        "shippingAddress": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "processing", "delivering", "completed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["buyerId", "items", "totalAmount", "shippingAddress", "status", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "A notification for a user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the recipient" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "message", "read", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles."
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Stores all products."
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Stores all orders."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "Stores user notifications."
+    }
+  }
+}
