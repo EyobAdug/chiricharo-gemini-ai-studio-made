@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { collection, addDoc, getDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, getDoc, doc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { CreditCard, MapPin, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -26,8 +26,12 @@ export default function Checkout() {
     try {
       const orderData = {
         buyerId: user.uid,
+        buyerName: profile?.name || user.email,
+        buyerEmail: user.email,
         items: cart.map(item => ({
           productId: item.id,
+          name: item.name,
+          image: item.image,
           sellerId: item.sellerId || 'admin', // fallback
           quantity: item.quantity,
           price: item.price,
@@ -86,6 +90,25 @@ export default function Checkout() {
         } catch (err) {
           console.error("Failed to queue seller email", err);
         }
+      }
+
+      // Notify Admins in-app
+      try {
+        const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
+        const adminSnapshot = await getDocs(adminQuery);
+        adminSnapshot.forEach(async (adminDoc) => {
+          await addDoc(collection(db, 'notifications'), {
+            userId: adminDoc.id,
+            title: 'New Platform Order',
+            message: `A new order #${orderId.slice(-6)} has been placed for ${cartTotal.toFixed(2)} ETB.`,
+            read: false,
+            type: 'order',
+            link: '/dashboard',
+            createdAt: new Date().toISOString()
+          });
+        });
+      } catch (err) {
+        console.error("Failed to notify admins", err);
       }
 
       // Email for Admin

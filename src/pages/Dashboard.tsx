@@ -21,6 +21,10 @@ export default function Dashboard() {
   const [actionReason, setActionReason] = useState('');
   const [updatingUser, setUpdatingUser] = useState(false);
 
+  // Order Details Modal State
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+
   // Add Product Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({
@@ -220,15 +224,22 @@ export default function Dashboard() {
             <thead className="bg-gray-50 text-gray-900 font-bold">
               <tr>
                 <th className="px-6 py-4">Order ID</th>
+                <th className="px-6 py-4">Item Name</th>
                 <th className="px-6 py-4">Amount</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Date</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {recentOrders.map(order => (
                 <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 font-medium text-gray-900">{order.id.slice(0, 8)}...</td>
+                  <td className="px-6 py-4">
+                    {profile?.role === 'admin' 
+                      ? order.items.map((i:any) => i.name).join(', ')
+                      : order.items.filter((i:any)=>i.sellerId===profile?.uid).map((i:any) => i.name).join(', ')}
+                  </td>
                   <td className="px-6 py-4">
                     {profile?.role === 'admin' 
                       ? order.totalAmount 
@@ -244,6 +255,17 @@ export default function Dashboard() {
                     </span>
                   </td>
                   <td className="px-6 py-4">{new Date(order.createdAt).toLocaleDateString()}</td>
+                  <td className="px-6 py-4 text-right">
+                    <button 
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        setIsOrderModalOpen(true);
+                      }}
+                      className="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1 rounded-full"
+                    >
+                      View Details
+                    </button>
+                  </td>
                 </tr>
               ))}
               {recentOrders.length === 0 && (
@@ -411,6 +433,7 @@ export default function Dashboard() {
           <thead className="bg-gray-50 text-gray-900 font-bold">
             <tr>
               <th className="px-6 py-4">Order ID</th>
+              <th className="px-6 py-4">Item Name</th>
               <th className="px-6 py-4">Amount (ETB)</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4">Date</th>
@@ -421,6 +444,11 @@ export default function Dashboard() {
             {orders.map(order => (
               <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 font-medium text-gray-900">{order.id.slice(0, 8)}...</td>
+                <td className="px-6 py-4">
+                  {profile?.role === 'admin' 
+                    ? order.items.map((i:any) => i.name).join(', ')
+                    : order.items.filter((i:any)=>i.sellerId===profile?.uid).map((i:any) => i.name).join(', ')}
+                </td>
                 <td className="px-6 py-4">
                   {profile?.role === 'admin' 
                     ? order.totalAmount 
@@ -436,7 +464,16 @@ export default function Dashboard() {
                   </span>
                 </td>
                 <td className="px-6 py-4">{new Date(order.createdAt).toLocaleDateString()}</td>
-                <td className="px-6 py-4 text-right">
+                <td className="px-6 py-4 text-right space-x-2">
+                  <button 
+                    onClick={() => {
+                      setSelectedOrder(order);
+                      setIsOrderModalOpen(true);
+                    }}
+                    className="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1 rounded-full mr-2"
+                  >
+                    View Details
+                  </button>
                   {profile?.role === 'admin' && order.status !== 'delivered' && order.status !== 'cancelled' && (
                     <select 
                       value={order.status}
@@ -665,6 +702,67 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+      {/* Order Details Modal */}
+      {isOrderModalOpen && selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+              <h3 className="text-xl font-bold text-gray-900">Order Details</h3>
+              <button onClick={() => setIsOrderModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-bold text-gray-500">Order ID</p>
+                  <p className="font-medium text-gray-900">{selectedOrder.id}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gray-500">Date</p>
+                  <p className="font-medium text-gray-900">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gray-500">Buyer Name</p>
+                  <p className="font-medium text-gray-900">{selectedOrder.buyerName || 'Unknown'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-gray-500">Buyer Email</p>
+                  <p className="font-medium text-gray-900">{selectedOrder.buyerEmail || 'Unknown'}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm font-bold text-gray-500">Delivery Address</p>
+                  <p className="font-medium text-gray-900 bg-gray-50 p-3 rounded-xl mt-1">{selectedOrder.shippingAddress}</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-gray-900 mb-3">Items</h4>
+                <div className="space-y-3">
+                  {selectedOrder.items.map((item: any, idx: number) => (
+                    <div key={idx} className="flex items-center gap-4 bg-gray-50 p-3 rounded-xl">
+                      {item.image && <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />}
+                      <div className="flex-1">
+                        <p className="font-bold text-gray-900">{item.name || 'Unknown Item'}</p>
+                        <p className="text-sm text-gray-500">Qty: {item.quantity} × {item.price} ETB</p>
+                      </div>
+                      <div className="font-bold text-gray-900">
+                        {(item.quantity * item.price).toFixed(2)} ETB
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                <p className="font-bold text-gray-500">Total Amount</p>
+                <p className="text-2xl font-black text-indigo-600">{selectedOrder.totalAmount.toFixed(2)} ETB</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
