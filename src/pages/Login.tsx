@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { 
+  signInWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider,
+  getMultiFactorResolver,
+  PhoneAuthProvider,
+  PhoneMultiFactorGenerator,
+  RecaptchaVerifier,
+  MultiFactorResolver,
+  MultiFactorError
+} from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ShieldCheck } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export default function Login() {
@@ -15,8 +25,115 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // MFA State
+  const [isMfaStep, setIsMfaStep] = useState(false);
+  const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
+  const [verificationId, setVerificationId] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
+  const [mfaLoading, setMfaLoading] = useState(false);
+  const recaptchaRef = useRef<HTMLDivElement>(null);
+  const recaptchaVerifier = useRef<RecaptchaVerifier | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (recaptchaVerifier.current) {
+        recaptchaVerifier.current.clear();
+      }
+    };
+  }, []);
+
+  const initRecaptcha = () => {
+    if (!recaptchaVerifier.current && recaptchaRef.current) {
+      recaptchaVerifier.current = new RecaptchaVerifier(auth, recaptchaRef.current, {
+        size: 'invisible',
+        callback: () => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        }
+      });
+    }
+  };
+
+  const handleMfaRequired = async (err: MultiFactorError) => {
+    const resolver = getMultiFactorResolver(auth, err);
+    setMfaResolver(resolver);
+    setIsMfaStep(true);
+    
+    // For this example, we assume the first hint is a phone number
+    const phoneInfoOptions = resolver.hints[0];
+    if (phoneInfoOptions.factorId === PhoneMultiFactorGenerator.FACTOR_ID) {
+      try {
+        initRecaptcha();
+        const phoneAuthProvider = new PhoneAuthProvider(auth);
+        const vId = await phoneAuthProvider.verifyPhoneNumber(
+          {
+            multiFactorHint: phoneInfoOptions,
+            session: resolver.session
+          },
+          recaptchaVerifier.current!
+        );
+        setVerificationId(vId);
+      } catch (mfaErr: any) {
+        console.error("MFA Error:", mfaErr);
+        setError("Failed to send verification code. Please try again.");
+      }
+    }
+  };
+
+  const handleMfaSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mfaResolver || !verificationId || !mfaCode) return;
+    
+    setMfaLoading(true);
+    setError('');
+    
+    try {
+      const cred = PhoneAuthProvider.credential(verificationId, mfaCode);
+      const multiFactorAssertion = PhoneMultiFactorGenerator.assertion(cred);
+      const result = await mfaResolver.resolveSignIn(multiFactorAssertion);
+      
+      await handlePostLogin(result.user);
+    } catch (err: any) {
+      console.error("MFA Resolution Error:", err);
+      setError(err.message || "Invalid verification code.");
+    } finally {
+      setMfaLoading(false);
+    }
+  };
+
+  const handlePostLogin = async (user: any) => {
+    // Check if user profile exists
+    const docRef = doc(db, 'users', user.uid);
+    const docSnap = await getDoc(docRef);
+    
+    if (!docSnap.exists()) {
+      // Create default buyer profile if it doesn't exist
+      await setDoc(docRef, {
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName || 'User',
+        role: 'buyer',
+        status: 'active',
+        createdAt: new Date().toISOString()
+      });
+    } else {
+      const data = docSnap.data();
+      if (data.status === 'suspended' || data.status === 'deleted') {
+        setError(data.deletionReason || 'Your account has been suspended or deleted.');
+        await auth.signOut();
+        return;
+      }
+    }
+    
+    navigate('/');
+  };
 
   const handleError = (err: any) => {
+    if (err.code === 'auth/multi-factor-auth-required') {
+      handleMfaRequired(err);
+      return;
+    }
+    
     if (err.code === 'auth/operation-not-allowed') {
       setError('Email/Password login is not enabled. Please use Google Login or enable it in Firebase Console.');
     } else if (err.code === 'auth/network-request-failed') {
@@ -34,8 +151,8 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate('/');
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      await handlePostLogin(result.user);
     } catch (err: any) {
       handleError(err);
     } finally {
@@ -49,31 +166,7 @@ export default function Login() {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      
-      // Check if user profile exists
-      const docRef = doc(db, 'users', result.user.uid);
-      const docSnap = await getDoc(docRef);
-      
-      if (!docSnap.exists()) {
-        // Create default buyer profile if it doesn't exist
-        await setDoc(docRef, {
-          uid: result.user.uid,
-          email: result.user.email,
-          name: result.user.displayName || 'User',
-          role: 'buyer',
-          status: 'active',
-          createdAt: new Date().toISOString()
-        });
-      } else {
-        const data = docSnap.data();
-        if (data.status === 'suspended' || data.status === 'deleted') {
-          setError(data.deletionReason || 'Your account has been suspended or deleted.');
-          await auth.signOut();
-          return;
-        }
-      }
-      
-      navigate('/');
+      await handlePostLogin(result.user);
     } catch (err: any) {
       handleError(err);
     } finally {
@@ -82,6 +175,60 @@ export default function Login() {
   };
 
   const displayError = error || authError;
+
+  if (isMfaStep) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+          <div className="text-center mb-8">
+            <div className="h-16 w-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="h-8 w-8 text-indigo-600" />
+            </div>
+            <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Two-Factor Auth</h1>
+            <p className="text-gray-600">Enter the verification code sent to your phone.</p>
+          </div>
+
+          {displayError && (
+            <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl flex items-start gap-3 text-sm font-medium">
+              <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+              <p>{displayError}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleMfaSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-bold text-gray-900 mb-2">Verification Code</label>
+              <input
+                type="text"
+                required
+                value={mfaCode}
+                onChange={(e) => setMfaCode(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+                placeholder="123456"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={mfaLoading}
+              className="w-full rounded-full bg-indigo-600 py-4 text-base font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50 active:scale-[0.98]"
+            >
+              {mfaLoading ? 'Verifying...' : 'Verify & Sign In'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsMfaStep(false)}
+              className="w-full text-sm font-bold text-gray-500 hover:text-gray-700 transition-all"
+            >
+              Back to Login
+            </button>
+          </form>
+          <div ref={recaptchaRef}></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -133,6 +280,7 @@ export default function Login() {
           </Link>
         </p>
       </div>
+      <div ref={recaptchaRef}></div>
     </div>
   );
 }
