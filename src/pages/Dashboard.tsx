@@ -40,6 +40,17 @@ export default function Dashboard() {
   });
   const [addingProduct, setAddingProduct] = useState(false);
 
+  // Edit Product State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [updatingProduct, setUpdatingProduct] = useState(false);
+
+  // Delete Product State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingProduct, setDeletingProduct] = useState<any>(null);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deletingProductLoading, setDeletingProductLoading] = useState(false);
+
   useEffect(() => {
     fetchData();
   }, [profile]);
@@ -117,6 +128,75 @@ export default function Dashboard() {
       fetchData();
     } catch (error) {
       console.error("Error updating product status:", error);
+    }
+  };
+
+  const handleUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    setUpdatingProduct(true);
+    try {
+      await updateDoc(doc(db, 'products', editingProduct.id), {
+        name: editingProduct.name,
+        description: editingProduct.description,
+        price: Number(editingProduct.price),
+        stock: Number(editingProduct.stock),
+        category: editingProduct.category,
+        color: editingProduct.color,
+        size: editingProduct.size,
+        condition: editingProduct.condition,
+      });
+      setIsEditModalOpen(false);
+      setEditingProduct(null);
+      fetchData();
+    } catch (error) {
+      console.error("Error updating product:", error);
+    } finally {
+      setUpdatingProduct(false);
+    }
+  };
+
+  const handleDeleteProductSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!deletingProduct || !deleteReason) return;
+    setDeletingProductLoading(true);
+    try {
+      // Delete the product
+      await deleteDoc(doc(db, 'products', deletingProduct.id));
+
+      // Notify Admins in-app
+      const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
+      const adminSnapshot = await getDocs(adminQuery);
+      adminSnapshot.forEach(async (adminDoc) => {
+        await addDoc(collection(db, 'notifications'), {
+          userId: adminDoc.id,
+          title: 'Product Deleted by Seller',
+          message: `Seller ${profile?.name} deleted product "${deletingProduct.name}". Reason: ${deleteReason}`,
+          read: false,
+          type: 'system',
+          link: '/dashboard',
+          createdAt: new Date().toISOString()
+        });
+      });
+
+      // Email for Admin
+      await addDoc(collection(db, 'mail'), {
+        to: 'tvandr32@gmail.com', // Admin email
+        message: {
+          subject: `Product Deleted - ${deletingProduct.name}`,
+          html: `<p>Hello Admin,</p><p>Seller <strong>${profile?.name || profile?.email}</strong> has deleted their product <strong>${deletingProduct.name}</strong>.</p><p><strong>Reason:</strong> ${deleteReason}</p>`
+        },
+        createdAt: new Date().toISOString()
+      });
+
+      setIsDeleteModalOpen(false);
+      setDeletingProduct(null);
+      setDeleteReason('');
+      fetchData();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    } finally {
+      setDeletingProductLoading(false);
     }
   };
 
@@ -237,8 +317,8 @@ export default function Dashboard() {
                   <td className="px-6 py-4 font-medium text-gray-900">{order.id.slice(0, 8)}...</td>
                   <td className="px-6 py-4">
                     {profile?.role === 'admin' 
-                      ? order.items.map((i:any) => i.name).join(', ')
-                      : order.items.filter((i:any)=>i.sellerId===profile?.uid).map((i:any) => i.name).join(', ')}
+                      ? order.items.map((i:any) => i.name || 'Unknown Item').join(', ')
+                      : order.items.filter((i:any)=>i.sellerId===profile?.uid).map((i:any) => i.name || 'Unknown Item').join(', ')}
                   </td>
                   <td className="px-6 py-4">
                     {profile?.role === 'admin' 
@@ -296,7 +376,7 @@ export default function Dashboard() {
         <table className="w-full text-left text-sm text-gray-600">
           <thead className="bg-gray-50 text-gray-900 font-bold">
             <tr>
-              <th className="px-6 py-4">Name</th>
+              <th className="px-6 py-4">Item Name</th>
               <th className="px-6 py-4">Price (ETB)</th>
               <th className="px-6 py-4">Stock</th>
               <th className="px-6 py-4">Status</th>
@@ -327,8 +407,26 @@ export default function Dashboard() {
                   )}
                   {profile?.role === 'seller' && (
                     <>
-                      <button className="text-indigo-600 hover:text-indigo-800"><Edit className="h-5 w-5 inline" /></button>
-                      <button className="text-gray-400 hover:text-red-600"><Trash2 className="h-5 w-5 inline" /></button>
+                      <button 
+                        onClick={() => {
+                          setEditingProduct(product);
+                          setIsEditModalOpen(true);
+                        }}
+                        className="text-indigo-600 hover:text-indigo-800"
+                        title="Edit Product"
+                      >
+                        <Edit className="h-5 w-5 inline" />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setDeletingProduct(product);
+                          setIsDeleteModalOpen(true);
+                        }}
+                        className="text-gray-400 hover:text-red-600"
+                        title="Delete Product"
+                      >
+                        <Trash2 className="h-5 w-5 inline" />
+                      </button>
                     </>
                   )}
                 </td>
@@ -446,8 +544,8 @@ export default function Dashboard() {
                 <td className="px-6 py-4 font-medium text-gray-900">{order.id.slice(0, 8)}...</td>
                 <td className="px-6 py-4">
                   {profile?.role === 'admin' 
-                    ? order.items.map((i:any) => i.name).join(', ')
-                    : order.items.filter((i:any)=>i.sellerId===profile?.uid).map((i:any) => i.name).join(', ')}
+                    ? order.items.map((i:any) => i.name || 'Unknown Item').join(', ')
+                    : order.items.filter((i:any)=>i.sellerId===profile?.uid).map((i:any) => i.name || 'Unknown Item').join(', ')}
                 </td>
                 <td className="px-6 py-4">
                   {profile?.role === 'admin' 
@@ -759,6 +857,121 @@ export default function Dashboard() {
                 <p className="text-2xl font-black text-indigo-600">{selectedOrder.totalAmount.toFixed(2)} ETB</p>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Product Modal */}
+      {isEditModalOpen && editingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+              <h3 className="text-xl font-bold text-gray-900">Edit Product</h3>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <form onSubmit={handleUpdateProduct} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Product Name</label>
+                  <input required type="text" value={editingProduct.name} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Description</label>
+                  <textarea required rows={3} value={editingProduct.description} onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Price (ETB)</label>
+                  <input required type="number" value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Stock</label>
+                  <input required type="number" value={editingProduct.stock} onChange={e => setEditingProduct({...editingProduct, stock: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Category</label>
+                  <select value={editingProduct.category} onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <option>Electronics</option>
+                    <option>Clothing</option>
+                    <option>Home</option>
+                    <option>Beauty</option>
+                    <option>Sports</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Condition</label>
+                  <select value={editingProduct.condition} onChange={e => setEditingProduct({...editingProduct, condition: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                    <option>New</option>
+                    <option>Used - Like New</option>
+                    <option>Used - Good</option>
+                    <option>Used - Fair</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Color (Optional)</label>
+                  <input type="text" value={editingProduct.color} onChange={e => setEditingProduct({...editingProduct, color: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Size (Optional)</label>
+                  <input type="text" value={editingProduct.size} onChange={e => setEditingProduct({...editingProduct, size: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </div>
+              </div>
+              <div className="pt-4">
+                <button type="submit" disabled={updatingProduct} className="w-full rounded-full bg-indigo-600 py-3 text-base font-bold text-white hover:bg-indigo-700 transition-all disabled:opacity-50">
+                  {updatingProduct ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Product Modal */}
+      {isDeleteModalOpen && deletingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+              <h3 className="text-xl font-bold text-gray-900">Delete Product</h3>
+              <button onClick={() => setIsDeleteModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <form onSubmit={handleDeleteProductSubmit} className="p-6 space-y-4">
+              <div className="bg-red-50 p-4 rounded-xl mb-4">
+                <p className="text-sm text-red-800 font-medium">Are you sure you want to delete <strong>{deletingProduct.name}</strong>? This action cannot be undone.</p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Reason for Deletion</label>
+                <textarea 
+                  required 
+                  rows={3} 
+                  value={deleteReason} 
+                  onChange={e => setDeleteReason(e.target.value)}
+                  placeholder="Please provide a reason (e.g., Out of stock, Discontinued)..."
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">This reason will be sent to the platform administrators.</p>
+              </div>
+              
+              <div className="pt-4 flex gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="flex-1 rounded-full py-3 text-base font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={deletingProductLoading}
+                  className="flex-1 rounded-full py-3 text-base font-bold text-white bg-red-600 hover:bg-red-700 transition-all disabled:opacity-50"
+                >
+                  {deletingProductLoading ? 'Deleting...' : 'Delete Product'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

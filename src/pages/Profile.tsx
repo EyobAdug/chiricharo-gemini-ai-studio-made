@@ -212,7 +212,7 @@ export default function Profile() {
                         <div className="flex-1">
                           <p className="text-sm font-bold text-gray-900 mb-1">Items:</p>
                           <p className="text-sm text-gray-600 line-clamp-1">
-                            {order.items.map((i: any) => i.name).join(', ')}
+                            {order.items.map((i: any) => i.name || 'Unknown Item').join(', ')}
                           </p>
                         </div>
                         <div className="text-right ml-4">
