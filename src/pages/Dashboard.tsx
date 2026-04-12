@@ -661,7 +661,7 @@ export default function Dashboard() {
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <form onSubmit={handleAddProduct} className="p-6 space-y-4">
+            <form onSubmit={handleAddProduct} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-1">Product Name</label>
                 <input 
