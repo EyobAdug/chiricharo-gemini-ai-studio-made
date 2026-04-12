@@ -5,8 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { collection, addDoc, getDoc, doc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
-import { CreditCard, MapPin, CheckCircle2 } from 'lucide-react';
+import { CreditCard, MapPin, CheckCircle2, Truck } from 'lucide-react';
 import { motion } from 'motion/react';
+import { DELIVERY_OPTIONS, FREE_DELIVERY_THRESHOLD } from '../constants';
 
 export default function Checkout() {
   const { cart, cartTotal, clearCart } = useCart();
@@ -15,8 +16,18 @@ export default function Checkout() {
   const navigate = useNavigate();
   
   const [address, setAddress] = useState('');
+  const [deliveryOption, setDeliveryOption] = useState(DELIVERY_OPTIONS[0].id);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const selectedDelivery = DELIVERY_OPTIONS.find(d => d.id === deliveryOption) || DELIVERY_OPTIONS[0];
+  const isFreeStandard = cartTotal >= FREE_DELIVERY_THRESHOLD;
+  
+  const deliveryFee = deliveryOption === 'standard' && isFreeStandard 
+    ? 0 
+    : selectedDelivery.price;
+
+  const finalTotal = cartTotal + deliveryFee;
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +48,10 @@ export default function Checkout() {
           price: item.price,
           status: 'pending'
         })),
-        totalAmount: cartTotal,
+        totalAmount: finalTotal,
+        subtotal: cartTotal,
+        deliveryFee: deliveryFee,
+        deliveryOption: selectedDelivery.name,
         shippingAddress: address,
         status: 'pending',
         createdAt: new Date().toISOString()
@@ -50,7 +64,7 @@ export default function Checkout() {
       await addDoc(collection(db, 'notifications'), {
         userId: user.uid,
         title: 'Order Placed Successfully',
-        message: `Your order #${orderId.slice(-6)} for ${cartTotal.toFixed(2)} ETB has been placed.`,
+        message: `Your order #${orderId.slice(-6)} for ${finalTotal.toFixed(2)} ETB has been placed.`,
         read: false,
         type: 'order',
         link: '/profile',
@@ -100,7 +114,7 @@ export default function Checkout() {
           await addDoc(collection(db, 'notifications'), {
             userId: adminDoc.id,
             title: 'New Platform Order',
-            message: `A new order #${orderId.slice(-6)} has been placed for ${cartTotal.toFixed(2)} ETB.`,
+            message: `A new order #${orderId.slice(-6)} has been placed for ${finalTotal.toFixed(2)} ETB.`,
             read: false,
             type: 'order',
             link: '/dashboard',
@@ -116,7 +130,7 @@ export default function Checkout() {
         to: 'tvandr32@gmail.com', // Admin email from context
         message: {
           subject: `New Platform Order - #${orderId.slice(-6)}`,
-          html: `<p>A new order has been placed on Chiricharo.</p><p>Order ID: ${orderId}</p><p>Total: ${cartTotal.toFixed(2)} ETB</p><p>Buyer: ${profile?.name || user.email}</p>`
+          html: `<p>A new order has been placed on Chiricharo.</p><p>Order ID: ${orderId}</p><p>Total: ${finalTotal.toFixed(2)} ETB</p><p>Buyer: ${profile?.name || user.email}</p>`
         },
         createdAt: new Date().toISOString()
       });
@@ -147,6 +161,38 @@ export default function Checkout() {
     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-8">{t('checkout.title')}</h1>
       
+      <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 mb-8">
+        <div className="flex items-center gap-3 mb-6">
+          <Truck className="h-6 w-6 text-indigo-600" />
+          <h2 className="text-xl font-bold text-gray-900">Delivery Options</h2>
+        </div>
+        {isFreeStandard && (
+          <div className="mb-4 bg-green-50 text-green-700 p-3 rounded-xl text-sm font-bold">
+            🎉 Your order is over {FREE_DELIVERY_THRESHOLD} ETB! Standard Delivery is FREE.
+          </div>
+        )}
+        <div className="space-y-3">
+          {DELIVERY_OPTIONS.map(option => (
+            <label key={option.id} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${deliveryOption === option.id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="radio" 
+                  name="delivery" 
+                  value={option.id} 
+                  checked={deliveryOption === option.id}
+                  onChange={(e) => setDeliveryOption(e.target.value)}
+                  className="text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                />
+                <span className="font-medium text-gray-900">{option.name}</span>
+              </div>
+              <span className="font-bold text-gray-900">
+                {option.id === 'standard' && isFreeStandard ? 'FREE' : `${option.price} ETB`}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
         <form onSubmit={handlePlaceOrder} className="space-y-8">
           <div>
@@ -174,9 +220,19 @@ export default function Checkout() {
           </div>
 
           <div className="border-t border-gray-100 pt-6">
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between text-gray-600">
+                <span>Subtotal</span>
+                <span>{cartTotal.toFixed(2)} ETB</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Delivery ({selectedDelivery.name})</span>
+                <span>{deliveryFee === 0 ? 'FREE' : `${deliveryFee.toFixed(2)} ETB`}</span>
+              </div>
+            </div>
             <div className="flex justify-between text-xl font-black text-gray-900 mb-6">
               <span>{t('cart.total')}</span>
-              <span>{cartTotal.toFixed(2)} ETB</span>
+              <span>{finalTotal.toFixed(2)} ETB</span>
             </div>
             <button
               type="submit"

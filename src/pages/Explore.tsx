@@ -9,7 +9,9 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/src/firebase';
 import { cn } from '@/src/lib/utils';
 
-const CATEGORIES = ["All", "Electronics", "Fashion", "Home Tech", "Gaming", "Collectibles"];
+import { CATEGORIES as CONST_CATEGORIES } from '@/src/constants';
+
+const CATEGORIES = ["All", ...CONST_CATEGORIES.map(c => c.name)];
 
 export default function Explore() {
   const navigate = useNavigate();

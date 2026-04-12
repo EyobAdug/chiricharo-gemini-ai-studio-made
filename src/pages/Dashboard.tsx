@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { CATEGORIES } from '../constants';
 import { Package, Users, ShoppingBag, CheckCircle, XCircle, Plus, Edit, Trash2, X, LayoutDashboard } from 'lucide-react';
 
 export default function Dashboard() {
@@ -635,6 +636,14 @@ export default function Dashboard() {
             <Users className="h-5 w-5" /> {t('dashboard.users')}
           </button>
         )}
+        {profile?.role === 'seller' && (
+          <a
+            href="/seller-guide"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-gray-600 hover:bg-gray-100"
+          >
+            <Package className="h-5 w-5" /> Seller Guide
+          </a>
+        )}
       </aside>
 
       {/* Main Content */}
@@ -683,6 +692,11 @@ export default function Dashboard() {
                     type="number" required min="0" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})}
                     className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   />
+                  {newProduct.price && newProduct.category && (
+                    <p className="text-xs text-green-600 mt-1 font-bold">
+                      You earn: {(Number(newProduct.price) * (1 - (CATEGORIES.find(c => c.name === newProduct.category)?.commission || 0) / 100)).toFixed(2)} ETB
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Stock</label>
@@ -699,11 +713,9 @@ export default function Dashboard() {
                     value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}
                     className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   >
-                    <option value="Electronics">Electronics</option>
-                    <option value="Fashion">Fashion</option>
-                    <option value="Home Tech">Home Tech</option>
-                    <option value="Gaming">Gaming</option>
-                    <option value="Collectibles">Collectibles</option>
+                    {CATEGORIES.map(cat => (
+                      <option key={cat.name} value={cat.name}>{cat.name} (Commission: {cat.commission}%)</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -884,6 +896,11 @@ export default function Dashboard() {
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Price (ETB)</label>
                   <input required type="number" value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                  {editingProduct.price && editingProduct.category && (
+                    <p className="text-xs text-green-600 mt-1 font-bold">
+                      You earn: {(Number(editingProduct.price) * (1 - (CATEGORIES.find(c => c.name === editingProduct.category)?.commission || 0) / 100)).toFixed(2)} ETB
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Stock</label>
@@ -892,11 +909,9 @@ export default function Dashboard() {
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Category</label>
                   <select value={editingProduct.category} onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                    <option>Electronics</option>
-                    <option>Clothing</option>
-                    <option>Home</option>
-                    <option>Beauty</option>
-                    <option>Sports</option>
+                    {CATEGORIES.map(cat => (
+                      <option key={cat.name} value={cat.name}>{cat.name} (Commission: {cat.commission}%)</option>
+                    ))}
                   </select>
                 </div>
                 <div>

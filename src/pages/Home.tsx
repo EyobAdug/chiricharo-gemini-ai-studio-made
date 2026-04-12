@@ -45,11 +45,13 @@ const FEATURED_PRODUCTS = [
   }
 ];
 
+import { CATEGORIES as CONST_CATEGORIES } from '@/src/constants';
+
 const CATEGORIES = [
-  { name: "Electronics", icon: Zap, color: "bg-blue-50 text-blue-600" },
-  { name: "Fashion", icon: TrendingUp, color: "bg-pink-50 text-pink-600" },
-  { name: "Home & Garden", icon: Star, color: "bg-yellow-50 text-yellow-600" },
-  { name: "Collectibles", icon: Shield, color: "bg-indigo-50 text-indigo-600" },
+  { name: CONST_CATEGORIES[0].name, icon: Zap, color: "bg-blue-50 text-blue-600" },
+  { name: CONST_CATEGORIES[2].name, icon: TrendingUp, color: "bg-pink-50 text-pink-600" },
+  { name: CONST_CATEGORIES[4].name, icon: Star, color: "bg-yellow-50 text-yellow-600" },
+  { name: CONST_CATEGORIES[1].name, icon: Shield, color: "bg-indigo-50 text-indigo-600" },
 ];
 
 export default function Home() {

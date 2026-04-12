@@ -5,6 +5,8 @@ import { useCart } from '@/src/context/CartContext';
 import { useLanguage } from '@/src/context/LanguageContext';
 import { useAuth } from '@/src/context/AuthContext';
 
+import { DELIVERY_OPTIONS, FREE_DELIVERY_THRESHOLD } from '../constants';
+
 export default function Cart() {
   const { cart, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
   const { t } = useLanguage();
@@ -18,6 +20,10 @@ export default function Cart() {
       navigate('/login');
     }
   };
+
+  const isFreeStandard = cartTotal >= FREE_DELIVERY_THRESHOLD;
+  const estimatedDelivery = isFreeStandard ? 0 : DELIVERY_OPTIONS[0].price;
+  const estimatedTotal = cartTotal + estimatedDelivery;
 
   if (cartCount === 0) {
     return (
@@ -117,13 +123,15 @@ export default function Cart() {
                 <span>{cartTotal.toFixed(2)} {t('product.price')}</span>
               </div>
               <div className="flex justify-between text-gray-600">
-                <span>Shipping</span>
-                <span className="text-green-600 font-medium">Calculated at checkout</span>
+                <span>Estimated Delivery</span>
+                <span className={estimatedDelivery === 0 ? "text-green-600 font-bold" : ""}>
+                  {estimatedDelivery === 0 ? 'FREE' : `${estimatedDelivery.toFixed(2)} ETB`}
+                </span>
               </div>
               <hr className="border-gray-100" />
               <div className="flex justify-between text-xl font-black text-gray-900">
                 <span>{t('cart.total')}</span>
-                <span>{cartTotal.toFixed(2)} {t('product.price')}</span>
+                <span>{estimatedTotal.toFixed(2)} {t('product.price')}</span>
               </div>
             </div>
 

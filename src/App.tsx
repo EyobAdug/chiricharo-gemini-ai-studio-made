@@ -15,6 +15,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import SellerVerification from './pages/SellerVerification';
 import SellerWelcome from './pages/SellerWelcome';
+import SellerGuide from './pages/SellerGuide';
 import Dashboard from './pages/Dashboard';
 import Checkout from './pages/Checkout';
 import Legal from './pages/Legal';
@@ -79,6 +80,11 @@ export default function App() {
                   <Route path="/seller-welcome" element={
                     <ProtectedRoute allowedRoles={['seller']}>
                       <SellerWelcome />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/seller-guide" element={
+                    <ProtectedRoute allowedRoles={['seller']}>
+                      <SellerGuide />
                     </ProtectedRoute>
                   } />
                   <Route path="/dashboard/*" element={
