@@ -43,42 +43,63 @@ export default function Login() {
     };
   }, []);
 
-  const initRecaptcha = () => {
-    if (!recaptchaVerifier.current && recaptchaRef.current) {
-      recaptchaVerifier.current = new RecaptchaVerifier(auth, recaptchaRef.current, {
-        size: 'invisible',
-        callback: () => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        }
-      });
-    }
-  };
-
   const handleMfaRequired = async (err: MultiFactorError) => {
     const resolver = getMultiFactorResolver(auth, err);
     setMfaResolver(resolver);
     setIsMfaStep(true);
-    
-    // For this example, we assume the first hint is a phone number
-    const phoneInfoOptions = resolver.hints[0];
-    if (phoneInfoOptions.factorId === PhoneMultiFactorGenerator.FACTOR_ID) {
-      try {
-        initRecaptcha();
-        const phoneAuthProvider = new PhoneAuthProvider(auth);
-        const vId = await phoneAuthProvider.verifyPhoneNumber(
-          {
-            multiFactorHint: phoneInfoOptions,
-            session: resolver.session
-          },
-          recaptchaVerifier.current!
-        );
-        setVerificationId(vId);
-      } catch (mfaErr: any) {
-        console.error("MFA Error:", mfaErr);
-        setError("Failed to send verification code. Please try again.");
-      }
-    }
+    setError('');
   };
+
+  // Trigger code sending when MFA step is active and resolver is ready
+  useEffect(() => {
+    const sendCode = async () => {
+      if (isMfaStep && mfaResolver && !verificationId && !mfaLoading) {
+        const phoneInfoOptions = mfaResolver.hints[0];
+        if (phoneInfoOptions.factorId === PhoneMultiFactorGenerator.FACTOR_ID) {
+          try {
+            setMfaLoading(true);
+            
+            // Ensure recaptcha is initialized on the current element
+            if (recaptchaRef.current) {
+              if (recaptchaVerifier.current) {
+                recaptchaVerifier.current.clear();
+              }
+              recaptchaVerifier.current = new RecaptchaVerifier(auth, recaptchaRef.current, {
+                size: 'normal', // Use normal size for better reliability in iframes
+                callback: () => {
+                  // reCAPTCHA solved
+                }
+              });
+            }
+
+            if (!recaptchaVerifier.current) {
+              throw new Error("reCAPTCHA not initialized");
+            }
+
+            const phoneAuthProvider = new PhoneAuthProvider(auth);
+            const vId = await phoneAuthProvider.verifyPhoneNumber(
+              {
+                multiFactorHint: phoneInfoOptions,
+                session: mfaResolver.session
+              },
+              recaptchaVerifier.current
+            );
+            setVerificationId(vId);
+            setError('');
+          } catch (mfaErr: any) {
+            console.error("MFA Send Error:", mfaErr);
+            setError(`Failed to send code: ${mfaErr.message || 'Unknown error'}`);
+          } finally {
+            setMfaLoading(false);
+          }
+        } else {
+          setError("Unsupported second factor. Only SMS is supported currently.");
+        }
+      }
+    };
+
+    sendCode();
+  }, [isMfaStep, mfaResolver]);
 
   const handleMfaSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -216,15 +237,36 @@ export default function Login() {
               {mfaLoading ? 'Verifying...' : 'Verify & Sign In'}
             </button>
 
-            <button
-              type="button"
-              onClick={() => setIsMfaStep(false)}
-              className="w-full text-sm font-bold text-gray-500 hover:text-gray-700 transition-all"
-            >
-              Back to Login
-            </button>
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setVerificationId('');
+                  setMfaCode('');
+                  setError('');
+                }}
+                disabled={mfaLoading}
+                className="w-full text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-all disabled:opacity-50"
+              >
+                Resend Verification Code
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMfaStep(false);
+                  setMfaResolver(null);
+                  setVerificationId('');
+                  setMfaCode('');
+                  setError('');
+                }}
+                className="w-full text-sm font-bold text-gray-500 hover:text-gray-700 transition-all"
+              >
+                Back to Login
+              </button>
+            </div>
           </form>
-          <div ref={recaptchaRef}></div>
+          <div ref={recaptchaRef} className="mt-6 flex justify-center"></div>
         </div>
       </div>
     );
@@ -280,7 +322,6 @@ export default function Login() {
           </Link>
         </p>
       </div>
-      <div ref={recaptchaRef}></div>
     </div>
   );
 }
