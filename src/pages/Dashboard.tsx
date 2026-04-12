@@ -14,6 +14,13 @@ export default function Dashboard() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
+  // User Management State
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [userAction, setUserAction] = useState<'suspend' | 'delete'>('suspend');
+  const [actionReason, setActionReason] = useState('');
+  const [updatingUser, setUpdatingUser] = useState(false);
+
   // Add Product Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({
@@ -63,6 +70,27 @@ export default function Dashboard() {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUserAction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser || !actionReason) return;
+    setUpdatingUser(true);
+    try {
+      const status = userAction === 'suspend' ? 'suspended' : 'deleted';
+      await updateDoc(doc(db, 'users', selectedUser.id), {
+        status,
+        deletionReason: actionReason
+      });
+      setIsUserModalOpen(false);
+      setSelectedUser(null);
+      setActionReason('');
+      fetchData();
+    } catch (error) {
+      console.error("Error updating user status:", error);
+    } finally {
+      setUpdatingUser(false);
     }
   };
 
@@ -301,21 +329,56 @@ export default function Dashboard() {
                 <td className="px-6 py-4">{user.email}</td>
                 <td className="px-6 py-4 capitalize">{user.role}</td>
                 <td className="px-6 py-4">
-                  {user.role === 'seller' && user.sellerInfo ? (
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                      user.sellerInfo.status === 'approved' ? 'bg-green-100 text-green-700' :
-                      user.sellerInfo.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                      'bg-yellow-100 text-yellow-700'
+                  <div className="flex flex-col gap-1">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider w-fit ${
+                      user.status === 'suspended' ? 'bg-orange-100 text-orange-700' :
+                      user.status === 'deleted' ? 'bg-red-100 text-red-700' :
+                      'bg-green-100 text-green-700'
                     }`}>
-                      {user.sellerInfo.status}
+                      {user.status || 'active'}
                     </span>
-                  ) : '-'}
+                    {user.role === 'seller' && user.sellerInfo && (
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit ${
+                        user.sellerInfo.status === 'approved' ? 'bg-indigo-100 text-indigo-700' :
+                        user.sellerInfo.status === 'rejected' ? 'bg-gray-100 text-gray-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        Seller: {user.sellerInfo.status}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 text-right space-x-2">
                   {user.role === 'seller' && user.sellerInfo?.status === 'pending' && (
                     <>
-                      <button onClick={() => handleSellerStatus(user.id, 'approved')} className="text-green-600 hover:text-green-800"><CheckCircle className="h-5 w-5 inline" /></button>
-                      <button onClick={() => handleSellerStatus(user.id, 'rejected')} className="text-red-600 hover:text-red-800"><XCircle className="h-5 w-5 inline" /></button>
+                      <button onClick={() => handleSellerStatus(user.id, 'approved')} className="text-green-600 hover:text-green-800" title="Approve Seller"><CheckCircle className="h-5 w-5 inline" /></button>
+                      <button onClick={() => handleSellerStatus(user.id, 'rejected')} className="text-red-600 hover:text-red-800" title="Reject Seller"><XCircle className="h-5 w-5 inline" /></button>
+                    </>
+                  )}
+                  {user.role !== 'admin' && (
+                    <>
+                      <button 
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setUserAction('suspend');
+                          setIsUserModalOpen(true);
+                        }} 
+                        className="text-orange-600 hover:text-orange-800"
+                        title="Suspend User"
+                      >
+                        <XCircle className="h-5 w-5 inline" />
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setUserAction('delete');
+                          setIsUserModalOpen(true);
+                        }} 
+                        className="text-red-600 hover:text-red-800"
+                        title="Delete User"
+                      >
+                        <Trash2 className="h-5 w-5 inline" />
+                      </button>
                     </>
                   )}
                 </td>
@@ -539,6 +602,50 @@ export default function Dashboard() {
                   className="w-full rounded-full bg-indigo-600 py-3 text-base font-bold text-white hover:bg-indigo-700 transition-all disabled:opacity-50"
                 >
                   {addingProduct ? 'Adding...' : 'Submit for Approval'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* User Action Modal (Suspend/Delete) */}
+      {isUserModalOpen && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+              <h3 className="text-xl font-bold text-gray-900 capitalize">{userAction} User</h3>
+              <button onClick={() => setIsUserModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <form onSubmit={handleUserAction} className="p-6 space-y-4">
+              <div className="bg-gray-50 p-4 rounded-xl mb-4">
+                <p className="text-sm text-gray-600">User: <span className="font-bold text-gray-900">{selectedUser.name}</span></p>
+                <p className="text-sm text-gray-600">Email: <span className="font-bold text-gray-900">{selectedUser.email}</span></p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Reason for {userAction}</label>
+                <textarea 
+                  required 
+                  rows={4} 
+                  value={actionReason} 
+                  onChange={e => setActionReason(e.target.value)}
+                  placeholder={`Please provide a reason why this account is being ${userAction}ed...`}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
+              
+              <div className="pt-4">
+                <button 
+                  type="submit" 
+                  disabled={updatingUser}
+                  className={`w-full rounded-full py-3 text-base font-bold text-white transition-all disabled:opacity-50 ${
+                    userAction === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700'
+                  }`}
+                >
+                  {updatingUser ? 'Updating...' : `Confirm ${userAction}`}
                 </button>
               </div>
             </form>

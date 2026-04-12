@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export default function Login() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { error: authError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,6 +21,8 @@ export default function Login() {
       setError('Email/Password login is not enabled. Please use Google Login or enable it in Firebase Console.');
     } else if (err.code === 'auth/network-request-failed') {
       setError('Network error: Your browser, adblocker, or VPN is blocking the connection to Google. Please disable adblockers/shields and try again.');
+    } else if (err.code === 'auth/unauthorized-domain') {
+      setError('This domain is not authorized for Google Sign-In. Please contact the administrator.');
     } else {
       setError(err.message || 'Failed to login');
     }
@@ -57,8 +61,16 @@ export default function Login() {
           email: result.user.email,
           name: result.user.displayName || 'User',
           role: 'buyer',
+          status: 'active',
           createdAt: new Date().toISOString()
         });
+      } else {
+        const data = docSnap.data();
+        if (data.status === 'suspended' || data.status === 'deleted') {
+          setError(data.deletionReason || 'Your account has been suspended or deleted.');
+          await auth.signOut();
+          return;
+        }
       }
       
       navigate('/');
@@ -69,6 +81,8 @@ export default function Login() {
     }
   };
 
+  const displayError = error || authError;
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
@@ -77,10 +91,10 @@ export default function Login() {
           <p className="text-gray-600">{t('auth.login.subtitle')}</p>
         </div>
 
-        {error && (
+        {displayError && (
           <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl flex items-start gap-3 text-sm font-medium">
             <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-            <p>{error}</p>
+            <p>{displayError}</p>
           </div>
         )}
 

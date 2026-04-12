@@ -10,6 +10,8 @@ export interface UserProfile {
   email: string;
   name: string;
   role: Role;
+  status?: 'active' | 'deleted' | 'suspended';
+  deletionReason?: string;
   language: 'en' | 'am';
   sellerInfo?: {
     address: string;
@@ -25,6 +27,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   isAuthReady: boolean;
+  error?: string;
   refreshProfile: () => Promise<void>;
 }
 
@@ -35,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
 
   const fetchProfile = async (uid: string, email: string | null) => {
     try {
@@ -42,6 +46,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const data = docSnap.data() as UserProfile;
+        
+        // Check for suspended or deleted account
+        if (data.status === 'suspended' || data.status === 'deleted') {
+          setError(data.deletionReason || 'Your account has been suspended or deleted by an administrator.');
+          setProfile(null);
+          return;
+        }
+
+        setError(undefined);
         
         // Auto-assign admin role to specific email
         if (email === 'tvandr32@gmail.com' && data.role !== 'admin') {
@@ -52,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile(data);
       } else {
         setProfile(null);
+        setError(undefined);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -71,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await fetchProfile(firebaseUser.uid, firebaseUser.email);
       } else {
         setProfile(null);
+        setError(undefined);
       }
       setLoading(false);
       setIsAuthReady(true);
@@ -80,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, isAuthReady, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, isAuthReady, error, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

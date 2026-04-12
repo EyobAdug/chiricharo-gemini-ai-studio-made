@@ -9,6 +9,8 @@
         "email": { "type": "string", "format": "email" },
         "name": { "type": "string" },
         "role": { "type": "string", "enum": ["admin", "seller", "buyer"] },
+        "status": { "type": "string", "enum": ["active", "deleted", "suspended"], "description": "Account status" },
+        "deletionReason": { "type": "string", "description": "Reason for account deletion or suspension" },
         "language": { "type": "string", "enum": ["en", "am"] },
         "sellerInfo": {
           "type": "object",
