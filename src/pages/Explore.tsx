@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Filter, SlidersHorizontal, Star, ShoppingCart, X, ChevronDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '@/src/context/CartContext';
 import { useLanguage } from '@/src/context/LanguageContext';
+import { useAuth } from '@/src/context/AuthContext';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/src/firebase';
 import { cn } from '@/src/lib/utils';
@@ -11,8 +12,10 @@ import { cn } from '@/src/lib/utils';
 const CATEGORIES = ["All", "Electronics", "Fashion", "Home Tech", "Gaming", "Collectibles"];
 
 export default function Explore() {
+  const navigate = useNavigate();
   const { addToCart } = useCart();
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("featured");
@@ -49,6 +52,14 @@ export default function Explore() {
       return 0;
     });
   }, [products, searchQuery, selectedCategory, sortBy]);
+
+  const handleAddToCart = (product: any) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    addToCart(product);
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
@@ -180,7 +191,7 @@ export default function Explore() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="group relative flex flex-col rounded-2xl border border-gray-100 bg-white p-3 transition-all hover:shadow-xl hover:border-indigo-100"
                   >
-                    <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+                    <Link to={`/product/${product.id}`} className="relative aspect-square overflow-hidden rounded-xl bg-gray-100 block">
                       <img 
                         src={product.images?.[0] || product.image || "https://picsum.photos/seed/placeholder/600/600"} 
                         alt={product.name}
@@ -192,7 +203,7 @@ export default function Explore() {
                           {product.category}
                         </span>
                       </div>
-                    </div>
+                    </Link>
                     <div className="mt-4 px-2 pb-2">
                       <div className="flex items-center justify-between mb-1">
                         <Link to={`/product/${product.id}`}>
@@ -208,7 +219,7 @@ export default function Explore() {
                         <span className="text-xs text-gray-400">({product.reviews || 0})</span>
                       </div>
                       <button 
-                        onClick={() => addToCart(product)}
+                        onClick={() => handleAddToCart(product)}
                         className="mt-4 w-full rounded-xl bg-gray-900 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 active:scale-95 flex items-center justify-center gap-2"
                       >
                         <ShoppingCart className="h-4 w-4" /> {t('product.addToCart')}

@@ -3,12 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Package, Users, ShoppingBag, CheckCircle, XCircle, Plus, Edit, Trash2, X } from 'lucide-react';
+import { Package, Users, ShoppingBag, CheckCircle, XCircle, Plus, Edit, Trash2, X, LayoutDashboard } from 'lucide-react';
 
 export default function Dashboard() {
   const { profile } = useAuth();
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState('products');
+  const [activeTab, setActiveTab] = useState('overview');
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -22,45 +22,42 @@ export default function Dashboard() {
     price: '',
     stock: '',
     category: 'Electronics',
+    color: '',
+    size: '',
+    condition: 'New',
     image: ''
   });
   const [addingProduct, setAddingProduct] = useState(false);
 
   useEffect(() => {
     fetchData();
-  }, [profile, activeTab]);
+  }, [profile]);
 
   const fetchData = async () => {
     if (!profile) return;
     setLoading(true);
     try {
-      if (activeTab === 'products') {
-        let q;
-        if (profile.role === 'admin') {
-          q = query(collection(db, 'products'));
-        } else {
-          q = query(collection(db, 'products'), where('sellerId', '==', profile.uid));
-        }
-        const snapshot = await getDocs(q);
-        setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-      } else if (activeTab === 'orders') {
-        let q;
-        if (profile.role === 'admin') {
-          q = query(collection(db, 'orders'));
-        } else {
-          q = query(collection(db, 'orders'));
-        }
-        const snapshot = await getDocs(q);
-        let fetchedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        if (profile.role === 'seller') {
-          fetchedOrders = fetchedOrders.filter((order: any) => 
-            order.items.some((item: any) => item.sellerId === profile.uid)
-          );
-        }
-        setOrders(fetchedOrders);
-      } else if (activeTab === 'users' && profile.role === 'admin') {
-        const snapshot = await getDocs(query(collection(db, 'users')));
-        setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      // Fetch Products
+      let pQuery = profile.role === 'admin' ? query(collection(db, 'products')) : query(collection(db, 'products'), where('sellerId', '==', profile.uid));
+      const pSnapshot = await getDocs(pQuery);
+      setProducts(pSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+
+      // Fetch Orders
+      let oQuery = query(collection(db, 'orders'));
+      const oSnapshot = await getDocs(oQuery);
+      let fetchedOrders = oSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      if (profile.role === 'seller') {
+        fetchedOrders = fetchedOrders.filter((order: any) => 
+          order.items.some((item: any) => item.sellerId === profile.uid)
+        );
+      }
+      fetchedOrders.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setOrders(fetchedOrders);
+
+      // Fetch Users
+      if (profile.role === 'admin') {
+        const uSnapshot = await getDocs(query(collection(db, 'users')));
+        setUsers(uSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -107,13 +104,16 @@ export default function Dashboard() {
         price: Number(newProduct.price),
         stock: Number(newProduct.stock),
         category: newProduct.category,
+        color: newProduct.color,
+        size: newProduct.size,
+        condition: newProduct.condition,
         image: newProduct.image || `https://picsum.photos/seed/${Math.random()}/600/600`, // Placeholder
         sellerId: profile.uid,
         status: 'pending',
         createdAt: new Date().toISOString()
       });
       setIsAddModalOpen(false);
-      setNewProduct({ name: '', description: '', price: '', stock: '', category: 'Electronics', image: '' });
+      setNewProduct({ name: '', description: '', price: '', stock: '', category: 'Electronics', color: '', size: '', condition: 'New', image: '' });
       fetchData();
     } catch (error) {
       console.error("Error adding product:", error);
@@ -122,10 +122,103 @@ export default function Dashboard() {
     }
   };
 
+  const renderOverview = () => {
+    const totalProducts = products.length;
+    const approvedProducts = products.filter(p => p.status === 'approved').length;
+    const pendingProducts = products.filter(p => p.status === 'pending').length;
+    
+    const totalOrders = orders.length;
+    
+    let totalEarnings = 0;
+    if (profile?.role === 'admin') {
+      totalEarnings = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    } else {
+      orders.forEach(order => {
+        order.items.forEach((item: any) => {
+          if (item.sellerId === profile?.uid) {
+            totalEarnings += (item.price * item.quantity);
+          }
+        });
+      });
+    }
+
+    const recentOrders = orders.slice(0, 5);
+
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-gray-900">{t('dashboard.overview')}</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <p className="text-sm font-medium text-gray-500">{t('dashboard.totalEarnings')}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{totalEarnings.toFixed(2)} ETB</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <p className="text-sm font-medium text-gray-500">{t('dashboard.totalOrders')}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{totalOrders}</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <p className="text-sm font-medium text-gray-500">{t('dashboard.totalProducts')}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{totalProducts}</p>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
+            <div>
+              <p className="text-sm font-medium text-gray-500">{t('dashboard.approved')}</p>
+              <p className="text-2xl font-bold text-green-600 mt-2">{approvedProducts}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-medium text-gray-500">{t('dashboard.pending')}</p>
+              <p className="text-2xl font-bold text-yellow-600 mt-2">{pendingProducts}</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 className="text-lg font-bold text-gray-900 mt-8 mb-4">{t('dashboard.recentOrders')}</h3>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <table className="w-full text-left text-sm text-gray-600">
+            <thead className="bg-gray-50 text-gray-900 font-bold">
+              <tr>
+                <th className="px-6 py-4">Order ID</th>
+                <th className="px-6 py-4">Amount</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {recentOrders.map(order => (
+                <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 font-medium text-gray-900">{order.id.slice(0, 8)}...</td>
+                  <td className="px-6 py-4">
+                    {profile?.role === 'admin' 
+                      ? order.totalAmount 
+                      : order.items.filter((i:any)=>i.sellerId===profile?.uid).reduce((sum:number, i:any)=>sum+(i.price*i.quantity),0)} ETB
+                  </td>
+                  <td className="px-6 py-4 capitalize">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                      order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                      order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                      'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {order.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">{new Date(order.createdAt).toLocaleDateString()}</td>
+                </tr>
+              ))}
+              {recentOrders.length === 0 && (
+                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">No recent orders.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
   const renderProducts = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">{t('dashboard.products')}</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{profile?.role === 'admin' ? t('dashboard.allProducts') : t('dashboard.myProducts')}</h2>
         {profile?.role === 'seller' && (
           <button 
             onClick={() => setIsAddModalOpen(true)}
@@ -236,7 +329,7 @@ export default function Dashboard() {
 
   const renderOrders = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">{t('dashboard.orders')}</h2>
+      <h2 className="text-2xl font-bold text-gray-900">{profile?.role === 'admin' ? t('dashboard.allOrders') : t('dashboard.myOrders')}</h2>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full text-left text-sm text-gray-600">
           <thead className="bg-gray-50 text-gray-900 font-bold">
@@ -252,7 +345,11 @@ export default function Dashboard() {
             {orders.map(order => (
               <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 font-medium text-gray-900">{order.id.slice(0, 8)}...</td>
-                <td className="px-6 py-4">{order.totalAmount}</td>
+                <td className="px-6 py-4">
+                  {profile?.role === 'admin' 
+                    ? order.totalAmount 
+                    : order.items.filter((i:any)=>i.sellerId===profile?.uid).reduce((sum:number, i:any)=>sum+(i.price*i.quantity),0)}
+                </td>
                 <td className="px-6 py-4 capitalize">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
                     order.status === 'delivered' ? 'bg-green-100 text-green-700' :
@@ -294,12 +391,20 @@ export default function Dashboard() {
       {/* Sidebar */}
       <aside className="w-full md:w-64 shrink-0 space-y-2">
         <button
+          onClick={() => setActiveTab('overview')}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
+            activeTab === 'overview' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          <LayoutDashboard className="h-5 w-5" /> {t('dashboard.overview')}
+        </button>
+        <button
           onClick={() => setActiveTab('products')}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
             activeTab === 'products' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
-          <Package className="h-5 w-5" /> {t('dashboard.products')}
+          <Package className="h-5 w-5" /> {profile?.role === 'admin' ? t('dashboard.allProducts') : t('dashboard.myProducts')}
         </button>
         <button
           onClick={() => setActiveTab('orders')}
@@ -307,7 +412,7 @@ export default function Dashboard() {
             activeTab === 'orders' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
-          <ShoppingBag className="h-5 w-5" /> {t('dashboard.orders')}
+          <ShoppingBag className="h-5 w-5" /> {profile?.role === 'admin' ? t('dashboard.allOrders') : t('dashboard.myOrders')}
         </button>
         {profile?.role === 'admin' && (
           <button
@@ -327,6 +432,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-center h-64">Loading...</div>
         ) : (
           <>
+            {activeTab === 'overview' && renderOverview()}
             {activeTab === 'products' && renderProducts()}
             {activeTab === 'orders' && renderOrders()}
             {activeTab === 'users' && profile?.role === 'admin' && renderUsers()}
@@ -375,18 +481,49 @@ export default function Dashboard() {
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-1">Category</label>
-                <select 
-                  value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                >
-                  <option value="Electronics">Electronics</option>
-                  <option value="Fashion">Fashion</option>
-                  <option value="Home Tech">Home Tech</option>
-                  <option value="Gaming">Gaming</option>
-                  <option value="Collectibles">Collectibles</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Category</label>
+                  <select 
+                    value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  >
+                    <option value="Electronics">Electronics</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Home Tech">Home Tech</option>
+                    <option value="Gaming">Gaming</option>
+                    <option value="Collectibles">Collectibles</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Condition</label>
+                  <select 
+                    value={newProduct.condition} onChange={e => setNewProduct({...newProduct, condition: e.target.value})}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  >
+                    <option value="New">New</option>
+                    <option value="Used">Used</option>
+                    <option value="Refurbished">Refurbished</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Color (Optional)</label>
+                  <input 
+                    type="text" value={newProduct.color} onChange={e => setNewProduct({...newProduct, color: e.target.value})}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    placeholder="e.g. Black, Red"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-1">Size (Optional)</label>
+                  <input 
+                    type="text" value={newProduct.size} onChange={e => setNewProduct({...newProduct, size: e.target.value})}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    placeholder="e.g. M, L, 42"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-1">Image URL (Optional)</label>

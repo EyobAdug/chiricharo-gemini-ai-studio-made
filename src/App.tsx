@@ -16,6 +16,7 @@ import SellerVerification from './pages/SellerVerification';
 import Dashboard from './pages/Dashboard';
 import Checkout from './pages/Checkout';
 import Legal from './pages/Legal';
+import Profile from './pages/Profile';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -58,6 +59,11 @@ export default function App() {
                   <Route path="/legal" element={<Legal />} />
                   
                   {/* Protected Routes */}
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/checkout" element={
                     <ProtectedRoute>
                       <Checkout />

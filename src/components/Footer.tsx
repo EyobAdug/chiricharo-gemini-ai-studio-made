@@ -30,28 +30,28 @@ export default function Footer() {
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 mb-6">Shop</h3>
             <ul className="space-y-4">
               <li><Link to="/explore" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">All Products</Link></li>
-              <li><Link to="/categories" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Categories</Link></li>
-              <li><Link to="/featured" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Featured</Link></li>
-              <li><Link to="/new" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">New Arrivals</Link></li>
+              <li><Link to="/explore" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Categories</Link></li>
+              <li><Link to="/explore" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Featured</Link></li>
+              <li><Link to="/explore" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">New Arrivals</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 mb-6">Sell</h3>
             <ul className="space-y-4">
-              <li><Link to="/sell" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Start Selling</Link></li>
-              <li><Link to="/seller-guide" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Seller Guide</Link></li>
-              <li><Link to="/fees" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Fees & Policies</Link></li>
+              <li><Link to="/register" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Start Selling</Link></li>
+              <li><Link to="/legal" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Seller Guide</Link></li>
+              <li><Link to="/legal" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Fees & Policies</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 mb-6">Support</h3>
             <ul className="space-y-4">
-              <li><Link to="/help" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Help Center</Link></li>
-              <li><Link to="/contact" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Contact Us</Link></li>
-              <li><Link to="/privacy" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">{t('legal.privacy')}</Link></li>
-              <li><Link to="/terms" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">{t('legal.terms')}</Link></li>
+              <li><Link to="/legal" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Help Center</Link></li>
+              <li><Link to="/legal" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">Contact Us</Link></li>
+              <li><Link to="/legal" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">{t('legal.privacy')}</Link></li>
+              <li><Link to="/legal" className="text-sm text-gray-600 hover:text-indigo-600 transition-colors">{t('legal.terms')}</Link></li>
             </ul>
           </div>
         </div>

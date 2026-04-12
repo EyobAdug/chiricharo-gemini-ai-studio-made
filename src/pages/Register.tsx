@@ -18,6 +18,16 @@ export default function Register() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const handleError = (err: any) => {
+    if (err.code === 'auth/operation-not-allowed') {
+      setError('Email/Password registration is not enabled. Please use Google Sign Up or enable it in Firebase Console.');
+    } else if (err.code === 'auth/network-request-failed') {
+      setError('Network error: Your browser, adblocker, or VPN is blocking the connection to Google. Please disable adblockers/shields and try again.');
+    } else {
+      setError(err.message || 'Failed to register');
+    }
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -52,11 +62,7 @@ export default function Register() {
         navigate('/');
       }
     } catch (err: any) {
-      if (err.code === 'auth/operation-not-allowed') {
-        setError('Email/Password registration is not enabled. Please use Google Sign Up or enable it in Firebase Console.');
-      } else {
-        setError(err.message || 'Failed to register');
-      }
+      handleError(err);
     } finally {
       setLoading(false);
     }
@@ -99,7 +105,7 @@ export default function Register() {
         navigate('/');
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to register with Google');
+      handleError(err);
     } finally {
       setLoading(false);
     }
@@ -110,17 +116,17 @@ export default function Register() {
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900 mb-2">{t('auth.register.title')}</h1>
-          <p className="text-gray-600">Join the Chiricharo marketplace</p>
+          <p className="text-gray-600">{t('auth.register.subtitle')}</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl flex items-center gap-3 text-sm font-medium">
-            <AlertCircle className="h-5 w-5" />
-            {error}
+          <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl flex items-start gap-3 text-sm font-medium">
+            <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+            <p>{error}</p>
           </div>
         )}
 
-        <form onSubmit={handleRegister} className="space-y-6">
+        <div className="space-y-6">
           <div>
             <label className="block text-sm font-bold text-gray-900 mb-3">{t('auth.role.select')}</label>
             <div className="grid grid-cols-2 gap-4">
@@ -147,78 +153,13 @@ export default function Register() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-bold text-gray-900 mb-2">{t('auth.name')}</label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
-                placeholder="John Doe"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-900 mb-2">{t('auth.email')}</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
-                placeholder="you@example.com"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-900 mb-2">{t('auth.password')}</label>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
-                placeholder="••••••••"
-                minLength={6}
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-full bg-indigo-600 py-4 text-base font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? '...' : t('auth.submit.register')}
-          </button>
-        </form>
-
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with</span>
-            </div>
-          </div>
-
           <div className="mt-6">
             <button
               onClick={handleGoogleRegister}
               disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-xl shadow-sm text-base font-bold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-50 active:scale-[0.98]"
+              className="w-full flex justify-center py-4 px-4 border border-gray-300 rounded-xl shadow-sm text-base font-bold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-50 active:scale-[0.98]"
             >
-              <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
+              <svg className="h-6 w-6 mr-3" viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="#4285F4"
@@ -236,7 +177,7 @@ export default function Register() {
                   fill="#EA4335"
                 />
               </svg>
-              Google
+              Continue with Google
             </button>
           </div>
         </div>

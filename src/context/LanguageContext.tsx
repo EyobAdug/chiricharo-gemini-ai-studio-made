@@ -11,9 +11,9 @@ interface Translations {
 
 const translations: Translations = {
   // General
-  'app.name': { en: 'Chiricharo', am: 'ጭሪጫሮ' },
+  'app.name': { en: 'Chiricharo', am: 'ችርቻሮ' },
   'nav.home': { en: 'Home', am: 'ዋና ገጽ' },
-  'nav.explore': { en: 'Explore', am: 'ያስሱ' },
+  'nav.explore': { en: 'Marketplace', am: 'ገበያ' },
   'nav.cart': { en: 'Cart', am: 'ዘንቢል' },
   'nav.login': { en: 'Login', am: 'ግባ' },
   'nav.register': { en: 'Register', am: 'ተመዝገብ' },
@@ -26,14 +26,16 @@ const translations: Translations = {
   'role.buyer': { en: 'Buyer', am: 'ገዢ' },
 
   // Home
-  'home.hero.title': { en: 'Welcome to Chiricharo', am: 'እንኳን ወደ ጭሪጫሮ በደህና መጡ' },
+  'home.hero.title': { en: 'Welcome to Chiricharo', am: 'እንኳን ወደ ችርቻሮ በደህና መጡ' },
   'home.hero.subtitle': { en: 'The best multi-vendor marketplace in Ethiopia.', am: 'በኢትዮጵያ ውስጥ ምርጡ የብዙ ሻጮች የገበያ ቦታ።' },
   'home.hero.cta': { en: 'Start Shopping', am: 'ግብይት ይጀምሩ' },
   'home.featured': { en: 'Featured Products', am: 'ተለይተው የቀረቡ ምርቶች' },
 
   // Auth
   'auth.login.title': { en: 'Login to your account', am: 'ወደ መለያዎ ይግቡ' },
+  'auth.login.subtitle': { en: 'Welcome back to Chiricharo', am: 'እንኳን ወደ ችርቻሮ በደህና ተመለሱ' },
   'auth.register.title': { en: 'Create an account', am: 'መለያ ይፍጠሩ' },
+  'auth.register.subtitle': { en: 'Join the Chiricharo marketplace', am: 'የችርቻሮ ገበያን ይቀላቀሉ' },
   'auth.email': { en: 'Email Address', am: 'የኢሜይል አድራሻ' },
   'auth.password': { en: 'Password', am: 'የይለፍ ቃል' },
   'auth.name': { en: 'Full Name', am: 'ሙሉ ስም' },
@@ -55,6 +57,14 @@ const translations: Translations = {
   'product.price': { en: 'ETB', am: 'ብር' },
   'product.addToCart': { en: 'Add to Cart', am: 'ወደ ዘንቢል አክል' },
   'product.outOfStock': { en: 'Out of Stock', am: 'ከክምችት አልቋል' },
+  'product.color': { en: 'Color', am: 'ቀለም' },
+  'product.size': { en: 'Size', am: 'መጠን' },
+  'product.condition': { en: 'Condition', am: 'ሁኔታ' },
+  'product.stock': { en: 'Stock', am: 'ክምችት' },
+  'product.quantity': { en: 'Quantity', am: 'ብዛት' },
+  'product.condition.new': { en: 'New', am: 'አዲስ' },
+  'product.condition.used': { en: 'Used', am: 'ያገለገለ' },
+  'product.condition.refurbished': { en: 'Refurbished', am: 'የታደሰ' },
   
   // Cart & Checkout
   'cart.title': { en: 'Shopping Cart', am: 'የግዢ ዘንቢል' },
@@ -66,7 +76,22 @@ const translations: Translations = {
   'checkout.placeOrder': { en: 'Place Order', am: 'ትዕዛዝ ያስገቡ' },
   'checkout.success': { en: 'Order placed successfully!', am: 'ትዕዛዙ በተሳካ ሁኔታ ገብቷል!' },
 
+  // Profile
+  'profile.title': { en: 'Manage Account', am: 'መለያ ያስተዳድሩ' },
+  'profile.save': { en: 'Save Changes', am: 'ለውጦችን ያስቀምጡ' },
+  'profile.success': { en: 'Profile updated successfully!', am: 'መገለጫ በተሳካ ሁኔታ ዘምኗል!' },
+  'nav.profile': { en: 'Manage Account', am: 'መለያ ያስተዳድሩ' },
+
   // Dashboard (Admin/Seller)
+  'dashboard.overview': { en: 'Overview', am: 'አጠቃላይ እይታ' },
+  'dashboard.myProducts': { en: 'My Products', am: 'የእኔ ምርቶች' },
+  'dashboard.myOrders': { en: 'My Orders', am: 'የእኔ ትዕዛዞች' },
+  'dashboard.allProducts': { en: 'All Products', am: 'ሁሉም ምርቶች' },
+  'dashboard.allOrders': { en: 'All Orders', am: 'ሁሉም ትዕዛዞች' },
+  'dashboard.totalEarnings': { en: 'Total Earnings', am: 'አጠቃላይ ገቢ' },
+  'dashboard.totalProducts': { en: 'Total Products', am: 'አጠቃላይ ምርቶች' },
+  'dashboard.totalOrders': { en: 'Total Orders', am: 'አጠቃላይ ትዕዛዞች' },
+  'dashboard.recentOrders': { en: 'Recent Orders', am: 'የቅርብ ጊዜ ትዕዛዞች' },
   'dashboard.products': { en: 'Products', am: 'ምርቶች' },
   'dashboard.orders': { en: 'Orders', am: 'ትዕዛዞች' },
   'dashboard.users': { en: 'Users', am: 'ተጠቃሚዎች' },

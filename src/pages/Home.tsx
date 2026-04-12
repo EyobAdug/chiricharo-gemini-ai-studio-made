@@ -1,8 +1,9 @@
 import { motion } from 'motion/react';
 import { ArrowRight, Star, Shield, Zap, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '@/src/context/CartContext';
 import { useLanguage } from '@/src/context/LanguageContext';
+import { useAuth } from '@/src/context/AuthContext';
 import { cn } from '@/src/lib/utils';
 
 const FEATURED_PRODUCTS = [
@@ -52,8 +53,18 @@ const CATEGORIES = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   const { addToCart } = useCart();
   const { t } = useLanguage();
+  const { user } = useAuth();
+
+  const handleAddToCart = (product: any) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    addToCart(product);
+  };
 
   return (
     <div className="flex flex-col gap-20 pb-20">
@@ -118,7 +129,7 @@ export default function Home() {
               viewport={{ once: true }}
               className="group relative flex flex-col rounded-2xl border border-gray-100 bg-white p-3 transition-all hover:shadow-xl hover:border-indigo-100"
             >
-              <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+              <Link to={`/product/${product.id}`} className="relative aspect-square overflow-hidden rounded-xl bg-gray-100 block">
                 <img 
                   src={product.image} 
                   alt={product.name}
@@ -130,7 +141,7 @@ export default function Home() {
                     {product.category}
                   </span>
                 </div>
-              </div>
+              </Link>
               <div className="mt-4 px-2 pb-2">
                 <div className="flex items-center justify-between mb-1">
                   <Link to={`/product/${product.id}`}>
@@ -146,7 +157,7 @@ export default function Home() {
                   <span className="text-xs text-gray-400">({product.reviews} reviews)</span>
                 </div>
                 <button 
-                  onClick={() => addToCart(product)}
+                  onClick={() => handleAddToCart(product)}
                   className="mt-4 w-full rounded-xl bg-gray-900 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 active:scale-95"
                 >
                   {t('product.addToCart')}

@@ -70,15 +70,30 @@ export default function Navbar() {
             </Link>
 
             {user ? (
-              <div className="hidden md:flex items-center gap-2">
-                {(profile?.role === 'admin' || profile?.role === 'seller') && (
-                  <Link to="/dashboard" className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors" title={t('nav.dashboard')}>
-                    <LayoutDashboard className="h-5 w-5" />
+              <div className="hidden md:flex items-center gap-4 ml-2 pl-4 border-l border-gray-200">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                    <User className="h-4 w-4 text-indigo-600" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-gray-900 leading-none">{profile?.name || 'User'}</span>
+                    <span className="text-[10px] text-gray-500 leading-none mt-1">{user.email}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  <Link to="/profile" className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors" title={t('nav.profile') || 'Manage Account'}>
+                    <User className="h-5 w-5" />
                   </Link>
-                )}
-                <button onClick={handleLogout} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors" title={t('nav.logout')}>
-                  <LogOut className="h-5 w-5" />
-                </button>
+                  {(profile?.role === 'admin' || profile?.role === 'seller') && (
+                    <Link to="/dashboard" className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors" title={t('nav.dashboard')}>
+                      <LayoutDashboard className="h-5 w-5" />
+                    </Link>
+                  )}
+                  <button onClick={handleLogout} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors" title={t('nav.logout')}>
+                    <LogOut className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="hidden md:flex items-center gap-4 ml-2">
@@ -104,6 +119,16 @@ export default function Navbar() {
           <hr className="border-gray-100" />
           {user ? (
             <>
+              <div className="flex items-center gap-3 py-2 border-b border-gray-100 mb-2">
+                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                  <User className="h-5 w-5 text-indigo-600" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-gray-900">{profile?.name || 'User'}</span>
+                  <span className="text-xs text-gray-500">{user.email}</span>
+                </div>
+              </div>
+              <Link to="/profile" className="block text-base font-medium text-gray-600 hover:text-indigo-600">{t('nav.profile') || 'Manage Account'}</Link>
               {(profile?.role === 'admin' || profile?.role === 'seller') && (
                 <Link to="/dashboard" className="block text-base font-medium text-gray-600 hover:text-indigo-600">{t('nav.dashboard')}</Link>
               )}

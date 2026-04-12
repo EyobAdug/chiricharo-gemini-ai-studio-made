@@ -35,6 +35,9 @@
         "price": { "type": "number", "description": "Price in ETB" },
         "stock": { "type": "number" },
         "category": { "type": "string" },
+        "color": { "type": "string" },
+        "size": { "type": "string" },
+        "condition": { "type": "string", "enum": ["New", "Used", "Refurbished"] },
         "images": { "type": "array", "items": { "type": "string" } },
         "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
         "createdAt": { "type": "string", "format": "date-time" }
@@ -80,6 +83,20 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "title", "message", "read", "createdAt"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A product review left by a buyer.",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string", "description": "ID of the product being reviewed" },
+        "userId": { "type": "string", "description": "UID of the reviewer" },
+        "userName": { "type": "string", "description": "Name of the reviewer" },
+        "rating": { "type": "number", "description": "Rating from 1 to 5" },
+        "text": { "type": "string", "description": "Review text" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["productId", "userId", "userName", "rating", "text", "createdAt"]
     }
   },
   "firestore": {
@@ -98,6 +115,10 @@
     "/notifications/{notificationId}": {
       "schema": { "$ref": "#/entities/Notification" },
       "description": "Stores user notifications."
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Stores product reviews."
     }
   }
 }
