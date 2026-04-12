@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ArrowRight, Star, Shield, Zap, TrendingUp } from 'lucide-react';
+import { ArrowRight, Star, Shield, Zap, TrendingUp, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '@/src/context/CartContext';
 import { useLanguage } from '@/src/context/LanguageContext';
@@ -90,6 +90,11 @@ export default function Home() {
                 <Link to="/explore" className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-8 py-4 text-base font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 hover:-translate-y-1">
                   {t('home.hero.cta')} <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
+                {!user && (
+                  <Link to="/register?role=seller" className="inline-flex items-center justify-center rounded-full bg-white border-2 border-gray-200 px-8 py-4 text-base font-bold text-gray-900 hover:border-indigo-600 hover:text-indigo-600 transition-all hover:-translate-y-1">
+                    Become a Seller
+                  </Link>
+                )}
               </div>
             </motion.div>
 
@@ -112,11 +117,55 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Features Section */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-gray-50 rounded-3xl p-10 flex flex-col items-center text-center border border-gray-100">
+            <div className="h-16 w-16 bg-orange-100 rounded-full flex items-center justify-center mb-6">
+              <ShoppingBag className="h-8 w-8 text-orange-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Curated Selection</h3>
+            <p className="text-gray-600">Every product is reviewed and approved by our team.</p>
+          </div>
+          <div className="bg-gray-50 rounded-3xl p-10 flex flex-col items-center text-center border border-gray-100">
+            <div className="h-16 w-16 bg-teal-100 rounded-full flex items-center justify-center mb-6">
+              <ShieldCheck className="h-8 w-8 text-teal-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Secure Purchases</h3>
+            <p className="text-gray-600">Your transactions are protected with industry-standard security.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Shop by Categories */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-10">
+          <h2 className="text-3xl font-bold text-gray-900">Shop by Categories</h2>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {CATEGORIES.map((category) => {
+            const Icon = category.icon;
+            return (
+              <Link 
+                key={category.name} 
+                to="/explore" 
+                className="group flex flex-col items-center justify-center p-6 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all hover:border-indigo-100"
+              >
+                <div className={`h-16 w-16 rounded-2xl flex items-center justify-center mb-4 ${category.color} group-hover:scale-110 transition-transform`}>
+                  <Icon className="h-8 w-8" />
+                </div>
+                <span className="font-bold text-gray-900 text-center">{category.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Trending Products */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">{t('home.featured')}</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Trending Products</h2>
           </div>
           <Link to="/explore" className="text-sm font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
             Browse All <ArrowRight className="h-4 w-4" />

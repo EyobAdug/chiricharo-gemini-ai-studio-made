@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, addDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { CATEGORIES } from '../constants';
 import { Package, Users, ShoppingBag, CheckCircle, XCircle, Plus, Edit, Trash2, X, LayoutDashboard } from 'lucide-react';
@@ -95,10 +95,22 @@ export default function Dashboard() {
     setUpdatingUser(true);
     try {
       const status = userAction === 'suspend' ? 'suspended' : 'deleted';
-      await updateDoc(doc(db, 'users', selectedUser.id), {
-        status,
-        deletionReason: actionReason
-      });
+      
+      if (userAction === 'delete') {
+        // Move to deleted_users and remove from users
+        await setDoc(doc(db, 'deleted_users', selectedUser.id), {
+          ...selectedUser,
+          status: 'deleted',
+          deletionReason: actionReason,
+          deletedAt: new Date().toISOString()
+        });
+        await deleteDoc(doc(db, 'users', selectedUser.id));
+      } else {
+        await updateDoc(doc(db, 'users', selectedUser.id), {
+          status,
+          deletionReason: actionReason
+        });
+      }
 
       // Send email notification to the user
       if (selectedUser.email) {

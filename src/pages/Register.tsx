@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -10,11 +10,16 @@ import { useAuth } from '../context/AuthContext';
 export default function Register() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const { refreshProfile } = useAuth();
+  
+  const queryParams = new URLSearchParams(location.search);
+  const initialRole = queryParams.get('role') === 'seller' ? 'seller' : 'buyer';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [role, setRole] = useState<'buyer' | 'seller'>('buyer');
+  const [role, setRole] = useState<'buyer' | 'seller'>(initialRole);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
