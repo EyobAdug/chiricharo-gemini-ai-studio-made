@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { CreditCard, MapPin, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function Checkout() {
   const { cart, cartTotal, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   
@@ -39,7 +39,65 @@ export default function Checkout() {
         createdAt: new Date().toISOString()
       };
 
-      await addDoc(collection(db, 'orders'), orderData);
+      const orderRef = await addDoc(collection(db, 'orders'), orderData);
+      const orderId = orderRef.id;
+
+      // Notify Buyer
+      await addDoc(collection(db, 'notifications'), {
+        userId: user.uid,
+        title: 'Order Placed Successfully',
+        message: `Your order #${orderId.slice(-6)} for ${cartTotal.toFixed(2)} ETB has been placed.`,
+        read: false,
+        type: 'order',
+        link: '/profile',
+        createdAt: new Date().toISOString()
+      });
+
+      // Notify Sellers and Admin
+      const sellerIds = [...new Set(cart.map(item => item.sellerId).filter(Boolean))] as string[];
+      
+      for (const sellerId of sellerIds) {
+        if (sellerId === 'admin') continue;
+        
+        // In-app notification for seller
+        await addDoc(collection(db, 'notifications'), {
+          userId: sellerId,
+          title: 'New Order Received',
+          message: `You have a new order #${orderId.slice(-6)} for your products.`,
+          read: false,
+          type: 'order',
+          link: '/dashboard',
+          createdAt: new Date().toISOString()
+        });
+
+        // Email for seller
+        try {
+          const sellerDoc = await getDoc(doc(db, 'users', sellerId));
+          if (sellerDoc.exists() && sellerDoc.data().email) {
+            await addDoc(collection(db, 'mail'), {
+              to: sellerDoc.data().email,
+              message: {
+                subject: `New Order Received - #${orderId.slice(-6)}`,
+                html: `<p>Hello ${sellerDoc.data().name},</p><p>You have received a new order on Chiricharo.</p><p>Order ID: ${orderId}</p><p>Please check your dashboard to fulfill it.</p>`
+              },
+              createdAt: new Date().toISOString()
+            });
+          }
+        } catch (err) {
+          console.error("Failed to queue seller email", err);
+        }
+      }
+
+      // Email for Admin
+      await addDoc(collection(db, 'mail'), {
+        to: 'tvandr32@gmail.com', // Admin email from context
+        message: {
+          subject: `New Platform Order - #${orderId.slice(-6)}`,
+          html: `<p>A new order has been placed on Chiricharo.</p><p>Order ID: ${orderId}</p><p>Total: ${cartTotal.toFixed(2)} ETB</p><p>Buyer: ${profile?.name || user.email}</p>`
+        },
+        createdAt: new Date().toISOString()
+      });
+
       clearCart();
       setSuccess(true);
       setTimeout(() => navigate('/'), 3000);

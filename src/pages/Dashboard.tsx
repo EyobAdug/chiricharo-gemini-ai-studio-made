@@ -83,6 +83,19 @@ export default function Dashboard() {
         status,
         deletionReason: actionReason
       });
+
+      // Send email notification to the user
+      if (selectedUser.email) {
+        await addDoc(collection(db, 'mail'), {
+          to: selectedUser.email,
+          message: {
+            subject: `Your Chiricharo Account has been ${status}`,
+            html: `<p>Hello ${selectedUser.name},</p><p>Your account on Chiricharo has been <strong>${status}</strong> by an administrator.</p><p>Reason provided:</p><blockquote style="border-left: 4px solid #ccc; padding-left: 10px; color: #555;">${actionReason}</blockquote><p>If you believe this is an error, please contact support.</p>`
+          },
+          createdAt: new Date().toISOString()
+        });
+      }
+
       setIsUserModalOpen(false);
       setSelectedUser(null);
       setActionReason('');

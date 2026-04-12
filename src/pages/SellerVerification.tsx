@@ -34,7 +34,7 @@ export default function SellerVerification() {
       });
       
       await refreshProfile();
-      navigate('/dashboard');
+      navigate('/seller-welcome');
     } catch (err: any) {
       setError(err.message || 'Failed to submit verification details');
     } finally {

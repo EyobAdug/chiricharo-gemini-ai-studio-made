@@ -1,23 +1,55 @@
-import { Search, ShoppingCart, User, Menu, X, Globe, LogOut, LayoutDashboard } from 'lucide-react';
-import { useState } from 'react';
+import { Search, ShoppingCart, User, Menu, X, Globe, LogOut, LayoutDashboard, Bell } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/src/lib/utils';
 import { useCart } from '@/src/context/CartContext';
 import { useAuth } from '@/src/context/AuthContext';
 import { useLanguage } from '@/src/context/LanguageContext';
-import { auth } from '@/src/firebase';
+import { auth, db } from '@/src/firebase';
 import { signOut } from 'firebase/auth';
+import { collection, query, where, onSnapshot, orderBy, updateDoc, doc } from 'firebase/firestore';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const { cartCount } = useCart();
   const { user, profile } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!user) {
+      setNotifications([]);
+      return;
+    }
+
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setNotifications(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
   const handleLogout = async () => {
     await signOut(auth);
     navigate('/');
+  };
+
+  const markAsRead = async (id: string) => {
+    try {
+      await updateDoc(doc(db, 'notifications', id), { read: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
   };
 
   return (
@@ -59,6 +91,70 @@ export default function Navbar() {
               <Globe className="h-5 w-5" />
               <span className="text-xs font-bold uppercase">{language}</span>
             </button>
+
+            {user && (
+              <div className="relative">
+                <button 
+                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors relative"
+                  title="Notifications"
+                >
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {isNotificationsOpen && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                    <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                      <h3 className="font-bold text-gray-900">Notifications</h3>
+                      {unreadCount > 0 && (
+                        <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
+                          {unreadCount} new
+                        </span>
+                      )}
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center text-gray-500 text-sm">
+                          No notifications yet.
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-gray-50">
+                          {notifications.map((notif) => (
+                            <div 
+                              key={notif.id} 
+                              className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${!notif.read ? 'bg-indigo-50/30' : ''}`}
+                              onClick={() => {
+                                if (!notif.read) markAsRead(notif.id);
+                                if (notif.link) {
+                                  navigate(notif.link);
+                                  setIsNotificationsOpen(false);
+                                }
+                              }}
+                            >
+                              <div className="flex justify-between items-start mb-1">
+                                <h4 className={`text-sm font-bold ${!notif.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                                  {notif.title}
+                                </h4>
+                                {!notif.read && <span className="h-2 w-2 rounded-full bg-indigo-600 mt-1.5 shrink-0"></span>}
+                              </div>
+                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">{notif.message}</p>
+                              <span className="text-[10px] font-medium text-gray-400">
+                                {new Date(notif.createdAt).toLocaleDateString()} {new Date(notif.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <Link to="/cart" className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors relative">
               <ShoppingCart className="h-5 w-5" />
