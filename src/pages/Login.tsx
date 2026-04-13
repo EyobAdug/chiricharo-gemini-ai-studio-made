@@ -139,10 +139,20 @@ export default function Login() {
       });
     } else {
       const data = docSnap.data();
-      if (data.status === 'suspended' || data.status === 'deleted') {
-        setError(data.deletionReason || 'Your account has been suspended or deleted.');
+      if (data.status === 'suspended') {
+        setError(data.deletionReason || 'Your account has been suspended.');
         await auth.signOut();
         return;
+      } else if (data.status === 'deleted') {
+        // Allow deleted users to start fresh as a buyer
+        await setDoc(docRef, {
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || 'User',
+          role: 'buyer',
+          status: 'active',
+          createdAt: new Date().toISOString()
+        });
       }
     }
     

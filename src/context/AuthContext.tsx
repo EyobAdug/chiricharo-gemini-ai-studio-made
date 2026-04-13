@@ -47,10 +47,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (docSnap.exists()) {
         const data = docSnap.data() as UserProfile;
         
-        // Check for suspended or deleted account
-        if (data.status === 'suspended' || data.status === 'deleted') {
-          setError(data.deletionReason || 'Your account has been suspended or deleted by an administrator.');
+        // Check for suspended account
+        if (data.status === 'suspended') {
+          setError(data.deletionReason || 'Your account has been suspended by an administrator.');
           setProfile(null);
+          auth.signOut();
+          return;
+        }
+
+        // Check for deleted account (force them to login again to reset profile)
+        if (data.status === 'deleted') {
+          setProfile(null);
+          auth.signOut();
           return;
         }
 
