@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { doc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
-import { User, Mail, Shield, MapPin, Phone, CheckCircle, Package, X } from 'lucide-react';
+import { doc, updateDoc, collection, query, where, getDocs, setDoc, deleteDoc, addDoc } from 'firebase/firestore';
+import { db, auth } from '../firebase';
+import { User, Mail, Shield, MapPin, Phone, CheckCircle, Package, X, Trash2 } from 'lucide-react';
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth();
@@ -18,6 +18,10 @@ export default function Profile() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -93,6 +97,55 @@ export default function Profile() {
       console.error("Error updating profile:", error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !profile || !deleteReason) return;
+    setDeleting(true);
+    try {
+      // 1. If seller, delete all their products
+      if (profile.role === 'seller') {
+        const pQuery = query(collection(db, 'products'), where('sellerId', '==', user.uid));
+        const pSnapshot = await getDocs(pQuery);
+        for (const pDoc of pSnapshot.docs) {
+          await deleteDoc(doc(db, 'products', pDoc.id));
+        }
+      }
+
+      // 2. Move to deleted_users
+      await setDoc(doc(db, 'deleted_users', user.uid), {
+        ...profile,
+        status: 'deleted',
+        deletionReason: deleteReason,
+        deletedAt: new Date().toISOString(),
+        deletedBy: 'self'
+      });
+
+      // 3. Notify admins
+      const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
+      const adminSnap = await getDocs(adminQuery);
+      for (const adminDoc of adminSnap.docs) {
+        await addDoc(collection(db, 'notifications'), {
+          userId: adminDoc.id,
+          title: 'User Deleted Account',
+          message: `User ${profile.name} (${profile.email}) deleted their account. Reason: ${deleteReason}`,
+          createdAt: new Date().toISOString(),
+          read: false,
+          type: 'system'
+        });
+      }
+
+      // 4. Delete user profile
+      await deleteDoc(doc(db, 'users', user.uid));
+
+      // 5. Sign out
+      await auth.signOut();
+    } catch (error) {
+      console.error("Error deleting account:", error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -194,13 +247,20 @@ export default function Profile() {
                 </>
               )}
 
-              <div className="pt-2">
+              <div className="pt-2 flex flex-col gap-4">
                 <button 
                   type="submit" 
                   disabled={saving}
                   className="w-full rounded-full bg-indigo-600 px-8 py-3 text-sm font-bold text-white hover:bg-indigo-700 transition-all disabled:opacity-50"
                 >
                   {saving ? 'Saving...' : (t('profile.save') || 'Save Changes')}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  className="w-full rounded-full border border-red-200 bg-red-50 py-3 text-sm font-bold text-red-600 hover:bg-red-100 transition-all flex items-center justify-center gap-2"
+                >
+                  <Trash2 className="h-4 w-4" /> Delete Account
                 </button>
               </div>
             </form>
@@ -332,6 +392,55 @@ export default function Profile() {
                 <p className="text-2xl font-black text-indigo-600">{selectedOrder.totalAmount.toFixed(2)} ETB</p>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-red-600 flex items-center gap-2">
+                <Trash2 className="h-6 w-6" /> Delete Account
+              </h3>
+              <button onClick={() => setIsDeleteModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <form onSubmit={handleDeleteAccount} className="p-6 space-y-4">
+              <p className="text-gray-600 text-sm">
+                Are you sure you want to delete your account? This action cannot be undone.
+                {profile.role === 'seller' && " All your products will also be permanently removed."}
+              </p>
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Why are you leaving?</label>
+                <textarea
+                  required
+                  value={deleteReason}
+                  onChange={(e) => setDeleteReason(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                  rows={3}
+                  placeholder="Please tell us why you want to delete your account..."
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={deleting || !deleteReason}
+                  className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-bold text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {deleting ? 'Deleting...' : 'Delete Account'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

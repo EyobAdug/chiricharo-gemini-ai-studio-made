@@ -48,13 +48,14 @@ service cloud.firestore {
       // Users can update their own profile (except role). Admins can update any profile.
       allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin();
 
-      // Only admins can delete users
-      allow delete: if isAdmin();
+      // Users can delete their own profile, admins can delete any
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
     match /deleted_users/{userId} {
-      // Only admins can read, create, update, delete deleted_users
-      allow read, write: if isAdmin();
+      // Users can create their own deleted_users record, admins can do anything
+      allow create: if isOwner(userId) || isAdmin();
+      allow read, update, delete: if isAdmin();
     }
 
     match /products/{productId} {
@@ -67,8 +68,8 @@ service cloud.firestore {
       // Sellers can update their own products. Admins can update any product. Any authenticated user can update rating/reviews.
       allow update: if (isSeller() && resource.data.sellerId == request.auth.uid && request.resource.data.sellerId == resource.data.sellerId) || isAdmin() || (isAuthenticated() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rating', 'reviews']));
       
-      // Only admins can delete products.
-      allow delete: if isAdmin();
+      // Only admins can delete products, and sellers can delete their own products
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.sellerId == request.auth.uid);
     }
 
     match /reviews/{reviewId} {

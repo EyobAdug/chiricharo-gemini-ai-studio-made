@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, addDoc, setDoc } from 'firebase/firestore';
@@ -681,12 +682,12 @@ export default function Dashboard() {
           </button>
         )}
         {profile?.role === 'seller' && (
-          <a
-            href="/seller-guide"
+          <Link
+            to="/seller-guide"
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-gray-600 hover:bg-gray-100"
           >
             <Package className="h-5 w-5" /> Seller Guide
-          </a>
+          </Link>
         )}
       </aside>
 

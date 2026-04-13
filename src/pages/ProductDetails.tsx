@@ -27,6 +27,8 @@ export default function ProductDetails() {
   const [reviewText, setReviewText] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
 
+  const [isFavorite, setIsFavorite] = useState(false);
+
   useEffect(() => {
     const fetchProductAndReviews = async () => {
       if (!id) return;
@@ -58,6 +60,15 @@ export default function ProductDetails() {
             }
           });
           setHasPurchased(purchased);
+
+          // Check if favorited
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            if (userData.favorites && userData.favorites.includes(id)) {
+              setIsFavorite(true);
+            }
+          }
         }
 
       } catch (error) {
@@ -68,6 +79,48 @@ export default function ProductDetails() {
     };
     fetchProductAndReviews();
   }, [id, user]);
+
+  const handleFavorite = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        let newFavorites = userData.favorites || [];
+        if (isFavorite) {
+          newFavorites = newFavorites.filter((favId: string) => favId !== id);
+        } else {
+          newFavorites.push(id);
+        }
+        await updateDoc(userRef, { favorites: newFavorites });
+        setIsFavorite(!isFavorite);
+      }
+    } catch (error) {
+      console.error("Error updating favorites:", error);
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: product?.name || 'Chiricharo Product',
+      text: `Check out ${product?.name} on Chiricharo!`,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
 
   const handleAddToCart = () => {
     if (!user) {
@@ -188,10 +241,16 @@ export default function ProductDetails() {
                 {product.category}
               </span>
               <div className="flex gap-2">
-                <button className="p-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <Heart className="h-5 w-5 text-gray-400" />
+                <button 
+                  onClick={handleFavorite}
+                  className={cn("p-2 rounded-full border transition-colors", isFavorite ? "border-red-200 bg-red-50" : "border-gray-200 hover:bg-gray-50")}
+                >
+                  <Heart className={cn("h-5 w-5", isFavorite ? "text-red-500 fill-current" : "text-gray-400")} />
                 </button>
-                <button className="p-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors">
+                <button 
+                  onClick={handleShare}
+                  className="p-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
                   <Share2 className="h-5 w-5 text-gray-400" />
                 </button>
               </div>
@@ -349,9 +408,8 @@ export default function ProductDetails() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-2">Your Review</label>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Your Review (Optional)</label>
                     <textarea
-                      required
                       value={reviewText}
                       onChange={(e) => setReviewText(e.target.value)}
                       rows={4}
