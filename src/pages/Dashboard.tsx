@@ -13,6 +13,8 @@ export default function Dashboard() {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [deletedUsers, setDeletedUsers] = useState<any[]>([]);
+  const [showDeletedUsers, setShowDeletedUsers] = useState(false);
   const [loading, setLoading] = useState(true);
   
   // User Management State
@@ -81,6 +83,9 @@ export default function Dashboard() {
       if (profile.role === 'admin') {
         const uSnapshot = await getDocs(query(collection(db, 'users')));
         setUsers(uSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        
+        const dSnapshot = await getDocs(query(collection(db, 'deleted_users')));
+        setDeletedUsers(dSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -456,7 +461,23 @@ export default function Dashboard() {
 
   const renderUsers = () => (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">{t('dashboard.users')}</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">{t('dashboard.users')}</h2>
+        <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-xl">
+          <button 
+            onClick={() => setShowDeletedUsers(false)}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${!showDeletedUsers ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Active Users
+          </button>
+          <button 
+            onClick={() => setShowDeletedUsers(true)}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${showDeletedUsers ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Deleted Users
+          </button>
+        </div>
+      </div>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full text-left text-sm text-gray-600">
           <thead className="bg-gray-50 text-gray-900 font-bold">
@@ -465,11 +486,12 @@ export default function Dashboard() {
               <th className="px-6 py-4">Email</th>
               <th className="px-6 py-4">Role</th>
               <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4 text-right">Actions</th>
+              {!showDeletedUsers && <th className="px-6 py-4 text-right">Actions</th>}
+              {showDeletedUsers && <th className="px-6 py-4">Reason</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {users.map(user => (
+            {(showDeletedUsers ? deletedUsers : users).map(user => (
               <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 font-medium text-gray-900">{user.name}</td>
                 <td className="px-6 py-4">{user.email}</td>
@@ -483,7 +505,7 @@ export default function Dashboard() {
                     }`}>
                       {user.status || 'active'}
                     </span>
-                    {user.role === 'seller' && user.sellerInfo && (
+                    {!showDeletedUsers && user.role === 'seller' && user.sellerInfo && (
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit ${
                         user.sellerInfo.status === 'approved' ? 'bg-indigo-100 text-indigo-700' :
                         user.sellerInfo.status === 'rejected' ? 'bg-gray-100 text-gray-700' :
@@ -494,42 +516,52 @@ export default function Dashboard() {
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4 text-right space-x-2">
-                  {user.role === 'seller' && user.sellerInfo?.status === 'pending' && (
-                    <>
-                      <button onClick={() => handleSellerStatus(user.id, 'approved')} className="text-green-600 hover:text-green-800" title="Approve Seller"><CheckCircle className="h-5 w-5 inline" /></button>
-                      <button onClick={() => handleSellerStatus(user.id, 'rejected')} className="text-red-600 hover:text-red-800" title="Reject Seller"><XCircle className="h-5 w-5 inline" /></button>
-                    </>
-                  )}
-                  {user.role !== 'admin' && (
-                    <>
-                      <button 
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setUserAction('suspend');
-                          setIsUserModalOpen(true);
-                        }} 
-                        className="text-orange-600 hover:text-orange-800"
-                        title="Suspend User"
-                      >
-                        <XCircle className="h-5 w-5 inline" />
-                      </button>
-                      <button 
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setUserAction('delete');
-                          setIsUserModalOpen(true);
-                        }} 
-                        className="text-red-600 hover:text-red-800"
-                        title="Delete User"
-                      >
-                        <Trash2 className="h-5 w-5 inline" />
-                      </button>
-                    </>
-                  )}
-                </td>
+                {!showDeletedUsers && (
+                  <td className="px-6 py-4 text-right space-x-2">
+                    {user.role === 'seller' && user.sellerInfo?.status === 'pending' && (
+                      <>
+                        <button onClick={() => handleSellerStatus(user.id, 'approved')} className="text-green-600 hover:text-green-800" title="Approve Seller"><CheckCircle className="h-5 w-5 inline" /></button>
+                        <button onClick={() => handleSellerStatus(user.id, 'rejected')} className="text-red-600 hover:text-red-800" title="Reject Seller"><XCircle className="h-5 w-5 inline" /></button>
+                      </>
+                    )}
+                    {user.role !== 'admin' && (
+                      <>
+                        <button 
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setUserAction('suspend');
+                            setIsUserModalOpen(true);
+                          }} 
+                          className="text-orange-600 hover:text-orange-800"
+                          title="Suspend User"
+                        >
+                          <XCircle className="h-5 w-5 inline" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setUserAction('delete');
+                            setIsUserModalOpen(true);
+                          }} 
+                          className="text-red-600 hover:text-red-800"
+                          title="Delete User"
+                        >
+                          <Trash2 className="h-5 w-5 inline" />
+                        </button>
+                      </>
+                    )}
+                  </td>
+                )}
+                {showDeletedUsers && (
+                  <td className="px-6 py-4 text-xs text-gray-500 max-w-xs truncate" title={user.deletionReason}>
+                    {user.deletionReason}
+                  </td>
+                )}
               </tr>
             ))}
+            {(showDeletedUsers ? deletedUsers : users).length === 0 && (
+              <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">No {showDeletedUsers ? 'deleted' : ''} users found.</td></tr>
+            )}
           </tbody>
         </table>
       </div>

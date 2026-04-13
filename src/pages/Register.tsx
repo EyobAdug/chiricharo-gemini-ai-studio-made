@@ -28,6 +28,8 @@ export default function Register() {
       setError('Email/Password registration is not enabled. Please use Google Sign Up or enable it in Firebase Console.');
     } else if (err.code === 'auth/network-request-failed') {
       setError('Network error: Your browser, adblocker, or VPN is blocking the connection to Google. Please disable adblockers/shields and try again.');
+    } else if (err.code === 'auth/email-already-in-use') {
+      setError('This email is already registered. If your account was deleted, please Log In instead to create a new profile.');
     } else {
       setError(err.message || 'Failed to register');
     }

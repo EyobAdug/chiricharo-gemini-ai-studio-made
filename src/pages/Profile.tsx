@@ -47,6 +47,29 @@ export default function Profile() {
     fetchOrders();
   }, [user]);
 
+  const handleUpgradeToSeller = async () => {
+    if (!user || !profile) return;
+    setSaving(true);
+    try {
+      const docRef = doc(db, 'users', user.uid);
+      await updateDoc(docRef, {
+        role: 'seller',
+        sellerInfo: {
+          status: 'pending',
+          address: '',
+          phone: '',
+          verificationDetails: ''
+        }
+      });
+      await refreshProfile();
+      setSuccessMsg('Successfully upgraded to Seller! Please complete your seller profile.');
+    } catch (error) {
+      console.error("Error upgrading to seller:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !profile) return;
@@ -115,14 +138,26 @@ export default function Profile() {
 
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-1">Role</label>
-                <div className="relative">
-                  <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input 
-                    type="text" 
-                    value={profile.role.toUpperCase()} 
-                    disabled
-                    className="w-full rounded-xl border border-gray-200 bg-gray-100 py-3 pl-10 pr-4 text-sm text-gray-500 cursor-not-allowed font-bold"
-                  />
+                <div className="relative flex items-center gap-4">
+                  <div className="relative flex-1">
+                    <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input 
+                      type="text" 
+                      value={profile.role.toUpperCase()} 
+                      disabled
+                      className="w-full rounded-xl border border-gray-200 bg-gray-100 py-3 pl-10 pr-4 text-sm text-gray-500 cursor-not-allowed font-bold"
+                    />
+                  </div>
+                  {profile.role === 'buyer' && (
+                    <button 
+                      type="button"
+                      onClick={handleUpgradeToSeller}
+                      disabled={saving}
+                      className="shrink-0 text-sm font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-4 py-3 rounded-xl border border-indigo-100 transition-colors disabled:opacity-50"
+                    >
+                      Become a Seller
+                    </button>
+                  )}
                 </div>
               </div>
 
