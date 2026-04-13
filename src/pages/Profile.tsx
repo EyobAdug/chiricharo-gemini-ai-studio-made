@@ -158,12 +158,12 @@ export default function Profile() {
         {/* Profile Info */}
         <div className="lg:col-span-1 space-y-8">
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-            <div className="bg-indigo-600 px-6 py-8 text-white flex flex-col items-center text-center">
+            <div className="bg-emerald-700 px-6 py-8 text-white flex flex-col items-center text-center">
               <div className="h-24 w-24 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm mb-4">
                 <User className="h-12 w-12 text-white" />
               </div>
               <h1 className="text-2xl font-extrabold">{t('profile.title') || 'Manage Account'}</h1>
-              <p className="text-indigo-100 mt-1 flex items-center gap-2 text-sm">
+              <p className="text-emerald-100 mt-1 flex items-center gap-2 text-sm">
                 <Mail className="h-4 w-4" /> {user?.email}
               </p>
             </div>
@@ -183,7 +183,7 @@ export default function Profile() {
                     type="text" 
                     value={name} 
                     onChange={e => setName(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     required
                   />
                 </div>
@@ -206,7 +206,7 @@ export default function Profile() {
                       type="button"
                       onClick={handleUpgradeToSeller}
                       disabled={saving}
-                      className="shrink-0 text-sm font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-4 py-3 rounded-xl border border-indigo-100 transition-colors disabled:opacity-50"
+                      className="shrink-0 text-sm font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-4 py-3 rounded-xl border border-emerald-100 transition-colors disabled:opacity-50"
                     >
                       Become a Seller
                     </button>
@@ -227,7 +227,7 @@ export default function Profile() {
                         type="text" 
                         value={address} 
                         onChange={e => setAddress(e.target.value)}
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
                   </div>
@@ -240,7 +240,7 @@ export default function Profile() {
                         type="text" 
                         value={phone} 
                         onChange={e => setPhone(e.target.value)}
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
                   </div>
@@ -251,7 +251,7 @@ export default function Profile() {
                 <button 
                   type="submit" 
                   disabled={saving}
-                  className="w-full rounded-full bg-indigo-600 px-8 py-3 text-sm font-bold text-white hover:bg-indigo-700 transition-all disabled:opacity-50"
+                  className="w-full rounded-full bg-emerald-700 px-8 py-3 text-sm font-bold text-white hover:bg-emerald-800 transition-all disabled:opacity-50"
                 >
                   {saving ? 'Saving...' : (t('profile.save') || 'Save Changes')}
                 </button>
@@ -271,8 +271,8 @@ export default function Profile() {
         <div className="lg:col-span-2">
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden h-full flex flex-col">
             <div className="p-6 border-b border-gray-100 flex items-center gap-3">
-              <div className="h-10 w-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                <Package className="h-5 w-5 text-indigo-600" />
+              <div className="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                <Package className="h-5 w-5 text-emerald-700" />
               </div>
               <h2 className="text-xl font-bold text-gray-900">My Orders</h2>
             </div>
@@ -288,7 +288,7 @@ export default function Profile() {
               ) : (
                 <div className="space-y-4">
                   {orders.map(order => (
-                    <div key={order.id} className="border border-gray-100 rounded-2xl p-4 hover:border-indigo-100 transition-colors bg-gray-50/50">
+                    <div key={order.id} className="border border-gray-100 rounded-2xl p-4 hover:border-emerald-100 transition-colors bg-gray-50/50">
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Order #{order.id.slice(0, 8)}</p>
@@ -312,14 +312,14 @@ export default function Profile() {
                         </div>
                         <div className="text-right ml-4">
                           <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total</p>
-                          <p className="text-lg font-black text-indigo-600">{order.totalAmount.toFixed(2)} ETB</p>
+                          <p className="text-lg font-black text-emerald-700">{order.totalAmount.toFixed(2)} ETB</p>
                         </div>
                       </div>
                       
                       <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end">
                         <button 
                           onClick={() => setSelectedOrder(order)}
-                          className="text-sm font-bold text-indigo-600 hover:text-indigo-800"
+                          className="text-sm font-bold text-emerald-700 hover:text-emerald-800"
                         >
                           View Details
                         </button>
@@ -389,7 +389,7 @@ export default function Profile() {
               
               <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                 <p className="font-bold text-gray-500">Total Amount</p>
-                <p className="text-2xl font-black text-indigo-600">{selectedOrder.totalAmount.toFixed(2)} ETB</p>
+                <p className="text-2xl font-black text-emerald-700">{selectedOrder.totalAmount.toFixed(2)} ETB</p>
               </div>
             </div>
           </div>

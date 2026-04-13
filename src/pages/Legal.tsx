@@ -8,7 +8,7 @@ export default function Legal() {
     <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 space-y-16">
       <section>
         <h1 className="text-3xl font-extrabold text-gray-900 mb-6">{t('legal.privacy')}</h1>
-        <div className="prose prose-indigo max-w-none text-gray-600 space-y-4">
+        <div className="prose prose-emerald max-w-none text-gray-600 space-y-4">
           <p><strong>1. Data Collection:</strong> We collect personal information such as name, email, and address to facilitate transactions on Chiricharo.</p>
           <p><strong>2. Data Protection:</strong> Your privacy is our priority. We implement robust security measures to protect your personal data from unauthorized access.</p>
           <p><strong>3. Seller Information:</strong> Sellers are required to provide verified business information to ensure trust and prevent scams. This information is securely stored and only used for verification purposes.</p>
@@ -18,7 +18,7 @@ export default function Legal() {
 
       <section>
         <h1 className="text-3xl font-extrabold text-gray-900 mb-6">{t('legal.terms')}</h1>
-        <div className="prose prose-indigo max-w-none text-gray-600 space-y-4">
+        <div className="prose prose-emerald max-w-none text-gray-600 space-y-4">
           <p><strong>1. Platform Role:</strong> Chiricharo acts as an intermediary marketplace connecting buyers and sellers in Ethiopia. We facilitate the transaction and delivery process.</p>
           <p><strong>2. Seller Responsibilities:</strong> 
             <ul className="list-disc pl-5 mt-2 space-y-1">

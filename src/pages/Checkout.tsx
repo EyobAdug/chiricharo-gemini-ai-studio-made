@@ -163,7 +163,7 @@ export default function Checkout() {
       
       <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 mb-8">
         <div className="flex items-center gap-3 mb-6">
-          <Truck className="h-6 w-6 text-indigo-600" />
+          <Truck className="h-6 w-6 text-emerald-700" />
           <h2 className="text-xl font-bold text-gray-900">Delivery Options</h2>
         </div>
         {isFreeStandard && (
@@ -173,7 +173,7 @@ export default function Checkout() {
         )}
         <div className="space-y-3">
           {DELIVERY_OPTIONS.map(option => (
-            <label key={option.id} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${deliveryOption === option.id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}>
+            <label key={option.id} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${deliveryOption === option.id ? 'border-emerald-600 bg-emerald-50' : 'border-gray-200 hover:border-emerald-300'}`}>
               <div className="flex items-center gap-3">
                 <input 
                   type="radio" 
@@ -181,7 +181,7 @@ export default function Checkout() {
                   value={option.id} 
                   checked={deliveryOption === option.id}
                   onChange={(e) => setDeliveryOption(e.target.value)}
-                  className="text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                  className="text-emerald-600 focus:ring-emerald-500 h-4 w-4"
                 />
                 <span className="font-medium text-gray-900">{option.name}</span>
               </div>
@@ -197,21 +197,21 @@ export default function Checkout() {
         <form onSubmit={handlePlaceOrder} className="space-y-8">
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-indigo-600" /> {t('checkout.shipping')}
+              <MapPin className="h-5 w-5 text-emerald-700" /> {t('checkout.shipping')}
             </h2>
             <textarea
               required
               rows={3}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
               placeholder="Enter your full delivery address in Ethiopia..."
             />
           </div>
 
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-indigo-600" /> Payment Method
+              <CreditCard className="h-5 w-5 text-emerald-700" /> Payment Method
             </h2>
             <div className="p-4 border border-gray-200 rounded-xl bg-gray-50 text-sm text-gray-600">
               <p className="font-bold text-gray-900 mb-1">Cash on Delivery / Telebirr (Coming Soon)</p>
@@ -237,7 +237,7 @@ export default function Checkout() {
             <button
               type="submit"
               disabled={loading || cart.length === 0}
-              className="w-full rounded-full bg-indigo-600 py-4 text-base font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50"
+              className="w-full rounded-full bg-emerald-700 py-4 text-base font-bold text-white hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-100 disabled:opacity-50"
             >
               {loading ? '...' : t('checkout.placeOrder')}
             </button>

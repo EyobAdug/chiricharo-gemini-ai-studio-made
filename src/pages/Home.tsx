@@ -48,10 +48,10 @@ const FEATURED_PRODUCTS = [
 import { CATEGORIES as CONST_CATEGORIES } from '@/src/constants';
 
 const CATEGORIES = [
-  { name: CONST_CATEGORIES[0].name, icon: Zap, color: "bg-blue-50 text-blue-600" },
-  { name: CONST_CATEGORIES[2].name, icon: TrendingUp, color: "bg-pink-50 text-pink-600" },
-  { name: CONST_CATEGORIES[4].name, icon: Star, color: "bg-yellow-50 text-yellow-600" },
-  { name: CONST_CATEGORIES[1].name, icon: Shield, color: "bg-indigo-50 text-indigo-600" },
+  { name: CONST_CATEGORIES[0].name, icon: Zap, color: "bg-emerald-50 text-emerald-600" },
+  { name: CONST_CATEGORIES[2].name, icon: TrendingUp, color: "bg-yellow-50 text-yellow-600" },
+  { name: CONST_CATEGORIES[4].name, icon: Star, color: "bg-red-50 text-red-600" },
+  { name: CONST_CATEGORIES[1].name, icon: Shield, color: "bg-emerald-50 text-emerald-600" },
 ];
 
 export default function Home() {
@@ -68,11 +68,36 @@ export default function Home() {
     addToCart(product);
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 100 }
+    }
+  };
+
   return (
     <div className="flex flex-col gap-20 pb-20">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white pt-16 lg:pt-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden bg-stone-50 pt-16 lg:pt-24 pb-16">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-5">
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-600 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 right-0 w-96 h-96 bg-yellow-500 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-24 left-1/3 w-96 h-96 bg-red-600 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
@@ -83,15 +108,15 @@ export default function Home() {
               <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 sm:text-6xl mb-6 leading-tight">
                 {t('home.hero.title')}
               </h1>
-              <p className="text-lg text-gray-600 mb-10 leading-relaxed">
+              <p className="text-lg text-gray-600 mb-10 leading-relaxed font-medium">
                 {t('home.hero.subtitle')}
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link to="/explore" className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-8 py-4 text-base font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 hover:-translate-y-1">
+                <Link to="/explore" className="inline-flex items-center justify-center rounded-full bg-emerald-700 px-8 py-4 text-base font-bold text-white hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-200 hover:-translate-y-1">
                   {t('home.hero.cta')} <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
                 {!user && (
-                  <Link to="/register?role=seller" className="inline-flex items-center justify-center rounded-full bg-white border-2 border-gray-200 px-8 py-4 text-base font-bold text-gray-900 hover:border-indigo-600 hover:text-indigo-600 transition-all hover:-translate-y-1">
+                  <Link to="/register?role=seller" className="inline-flex items-center justify-center rounded-full bg-white border-2 border-emerald-100 px-8 py-4 text-base font-bold text-emerald-800 hover:border-emerald-600 hover:text-emerald-700 transition-all hover:-translate-y-1 shadow-sm">
                     Become a Seller
                   </Link>
                 )}
@@ -104,12 +129,11 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="relative hidden lg:block"
             >
-              <div className="absolute -top-4 -left-4 h-72 w-72 rounded-full bg-indigo-100/50 blur-3xl"></div>
-              <div className="absolute -bottom-4 -right-4 h-72 w-72 rounded-full bg-purple-100/50 blur-3xl"></div>
+              <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500 via-yellow-400 to-red-500 rounded-[2rem] opacity-20 blur-lg"></div>
               <img 
-                src="https://picsum.photos/seed/shopping/800/800" 
+                src="https://picsum.photos/seed/ethiopian-market/800/800" 
                 alt="Marketplace Hero" 
-                className="relative rounded-3xl shadow-2xl object-cover aspect-square"
+                className="relative rounded-[2rem] shadow-2xl object-cover aspect-square border-4 border-white"
                 referrerPolicy="no-referrer"
               />
             </motion.div>
@@ -119,22 +143,28 @@ export default function Home() {
 
       {/* Features Section */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gray-50 rounded-3xl p-10 flex flex-col items-center text-center border border-gray-100">
-            <div className="h-16 w-16 bg-orange-100 rounded-full flex items-center justify-center mb-6">
-              <ShoppingBag className="h-8 w-8 text-orange-600" />
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
+          <motion.div variants={itemVariants} className="bg-white rounded-3xl p-10 flex flex-col items-center text-center border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="h-16 w-16 bg-yellow-50 rounded-full flex items-center justify-center mb-6">
+              <ShoppingBag className="h-8 w-8 text-yellow-600" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Curated Selection</h3>
             <p className="text-gray-600">Every product is reviewed and approved by our team.</p>
-          </div>
-          <div className="bg-gray-50 rounded-3xl p-10 flex flex-col items-center text-center border border-gray-100">
-            <div className="h-16 w-16 bg-teal-100 rounded-full flex items-center justify-center mb-6">
-              <ShieldCheck className="h-8 w-8 text-teal-600" />
+          </motion.div>
+          <motion.div variants={itemVariants} className="bg-white rounded-3xl p-10 flex flex-col items-center text-center border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="h-16 w-16 bg-emerald-50 rounded-full flex items-center justify-center mb-6">
+              <ShieldCheck className="h-8 w-8 text-emerald-600" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Secure Purchases</h3>
             <p className="text-gray-600">Your transactions are protected with industry-standard security.</p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Shop by Categories */}
@@ -142,23 +172,30 @@ export default function Home() {
         <div className="mb-10">
           <h2 className="text-3xl font-bold text-gray-900">Shop by Categories</h2>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="grid grid-cols-2 sm:grid-cols-4 gap-4"
+        >
           {CATEGORIES.map((category) => {
             const Icon = category.icon;
             return (
-              <Link 
-                key={category.name} 
-                to="/explore" 
-                className="group flex flex-col items-center justify-center p-6 bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all hover:border-indigo-100"
-              >
-                <div className={`h-16 w-16 rounded-2xl flex items-center justify-center mb-4 ${category.color} group-hover:scale-110 transition-transform`}>
-                  <Icon className="h-8 w-8" />
-                </div>
-                <span className="font-bold text-gray-900 text-center">{category.name}</span>
-              </Link>
+              <motion.div key={category.name} variants={itemVariants}>
+                <Link 
+                  to={`/explore?category=${category.name}`}
+                  className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-100 bg-white p-8 hover:border-emerald-200 hover:shadow-lg transition-all group h-full"
+                >
+                  <div className={cn("rounded-2xl p-4 transition-transform group-hover:scale-110", category.color)}>
+                    <Icon className="h-8 w-8" />
+                  </div>
+                  <span className="font-bold text-gray-900 text-center">{category.name}</span>
+                </Link>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </section>
 
       {/* Trending Products */}
@@ -167,18 +204,22 @@ export default function Home() {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Trending Products</h2>
           </div>
-          <Link to="/explore" className="text-sm font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
+          <Link to="/explore" className="text-sm font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
             Browse All <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4"
+        >
           {FEATURED_PRODUCTS.map((product) => (
             <motion.div 
               key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="group relative flex flex-col rounded-2xl border border-gray-100 bg-white p-3 transition-all hover:shadow-xl hover:border-indigo-100"
+              variants={itemVariants}
+              className="group relative flex flex-col rounded-2xl border border-gray-100 bg-white p-3 transition-all hover:shadow-xl hover:border-emerald-100"
             >
               <Link to={`/product/${product.id}`} className="relative aspect-square overflow-hidden rounded-xl bg-gray-100 block">
                 <img 
@@ -196,9 +237,9 @@ export default function Home() {
               <div className="mt-4 px-2 pb-2">
                 <div className="flex items-center justify-between mb-1">
                   <Link to={`/product/${product.id}`}>
-                    <h3 className="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1">{product.name}</h3>
+                    <h3 className="text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition-colors line-clamp-1">{product.name}</h3>
                   </Link>
-                  <p className="text-sm font-black text-indigo-600">{product.price} {t('product.price')}</p>
+                  <p className="text-sm font-black text-emerald-700">{product.price} {t('product.price')}</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="flex items-center text-yellow-400">
@@ -209,14 +250,14 @@ export default function Home() {
                 </div>
                 <button 
                   onClick={() => handleAddToCart(product)}
-                  className="mt-4 w-full rounded-xl bg-gray-900 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 active:scale-95"
+                  className="mt-4 w-full rounded-xl bg-gray-900 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-700 active:scale-95"
                 >
                   {t('product.addToCart')}
                 </button>
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
     </div>
   );

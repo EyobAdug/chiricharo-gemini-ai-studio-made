@@ -368,9 +368,9 @@ export default function Dashboard() {
                   <Line 
                     type="monotone" 
                     dataKey="earnings" 
-                    stroke="#4f46e5" 
+                    stroke="#047857" 
                     strokeWidth={3} 
-                    dot={{ fill: '#4f46e5', strokeWidth: 2, r: 4 }} 
+                    dot={{ fill: '#047857', strokeWidth: 2, r: 4 }} 
                     activeDot={{ r: 6, strokeWidth: 0 }}
                   />
                 </LineChart>
@@ -422,7 +422,7 @@ export default function Dashboard() {
                         setSelectedOrder(order);
                         setIsOrderModalOpen(true);
                       }}
-                      className="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1 rounded-full"
+                      className="text-emerald-700 hover:text-emerald-800 font-bold text-xs bg-emerald-50 px-3 py-1 rounded-full"
                     >
                       View Details
                     </button>
@@ -446,7 +446,7 @@ export default function Dashboard() {
         {profile?.role === 'seller' && (
           <button 
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-indigo-700 transition-colors"
+            className="flex items-center gap-2 bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-800 transition-colors"
           >
             <Plus className="h-5 w-5" /> {t('dashboard.addProduct')}
           </button>
@@ -493,7 +493,7 @@ export default function Dashboard() {
                           setEditingProduct(product);
                           setIsEditModalOpen(true);
                         }}
-                        className="text-indigo-600 hover:text-indigo-800"
+                        className="text-emerald-700 hover:text-emerald-800"
                         title="Edit Product"
                       >
                         <Edit className="h-5 w-5 inline" />
@@ -570,7 +570,7 @@ export default function Dashboard() {
                     </span>
                     {!showDeletedUsers && user.role === 'seller' && user.sellerInfo && (
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit ${
-                        user.sellerInfo.status === 'approved' ? 'bg-indigo-100 text-indigo-700' :
+                        user.sellerInfo.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
                         user.sellerInfo.status === 'rejected' ? 'bg-gray-100 text-gray-700' :
                         'bg-yellow-100 text-yellow-700'
                       }`}>
@@ -676,7 +676,7 @@ export default function Dashboard() {
                       setSelectedOrder(order);
                       setIsOrderModalOpen(true);
                     }}
-                    className="text-indigo-600 hover:text-indigo-800 font-bold text-xs bg-indigo-50 px-3 py-1 rounded-full mr-2"
+                    className="text-emerald-700 hover:text-emerald-800 font-bold text-xs bg-emerald-50 px-3 py-1 rounded-full mr-2"
                   >
                     View Details
                   </button>
@@ -684,7 +684,7 @@ export default function Dashboard() {
                     <select 
                       value={order.status}
                       onChange={(e) => handleOrderStatus(order.id, e.target.value)}
-                      className="text-sm border border-gray-200 rounded-lg px-2 py-1 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      className="text-sm border border-gray-200 rounded-lg px-2 py-1 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     >
                       <option value="pending">Pending</option>
                       <option value="processing">Processing</option>
@@ -712,7 +712,7 @@ export default function Dashboard() {
         <button
           onClick={() => setActiveTab('overview')}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-            activeTab === 'overview' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
+            activeTab === 'overview' ? 'bg-emerald-700 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
           <LayoutDashboard className="h-5 w-5" /> {t('dashboard.overview')}
@@ -720,7 +720,7 @@ export default function Dashboard() {
         <button
           onClick={() => setActiveTab('products')}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-            activeTab === 'products' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
+            activeTab === 'products' ? 'bg-emerald-700 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
           <Package className="h-5 w-5" /> {profile?.role === 'admin' ? t('dashboard.allProducts') : t('dashboard.myProducts')}
@@ -728,7 +728,7 @@ export default function Dashboard() {
         <button
           onClick={() => setActiveTab('orders')}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-            activeTab === 'orders' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
+            activeTab === 'orders' ? 'bg-emerald-700 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
           <ShoppingBag className="h-5 w-5" /> {profile?.role === 'admin' ? t('dashboard.allOrders') : t('dashboard.myOrders')}
@@ -737,7 +737,7 @@ export default function Dashboard() {
           <button
             onClick={() => setActiveTab('users')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-              activeTab === 'users' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
+              activeTab === 'users' ? 'bg-emerald-700 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
             <Users className="h-5 w-5" /> {t('dashboard.users')}
@@ -782,14 +782,14 @@ export default function Dashboard() {
                 <label className="block text-sm font-bold text-gray-900 mb-1">Product Name</label>
                 <input 
                   type="text" required value={newProduct.name} onChange={e => setNewProduct({...newProduct, name: e.target.value})}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-1">Description</label>
                 <textarea 
                   required rows={3} value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -797,7 +797,7 @@ export default function Dashboard() {
                   <label className="block text-sm font-bold text-gray-900 mb-1">Price (ETB)</label>
                   <input 
                     type="number" required min="0" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                   {newProduct.price && newProduct.category && (
                     <p className="text-xs text-green-600 mt-1 font-bold">
@@ -809,7 +809,7 @@ export default function Dashboard() {
                   <label className="block text-sm font-bold text-gray-900 mb-1">Stock</label>
                   <input 
                     type="number" required min="0" value={newProduct.stock} onChange={e => setNewProduct({...newProduct, stock: e.target.value})}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -818,7 +818,7 @@ export default function Dashboard() {
                   <label className="block text-sm font-bold text-gray-900 mb-1">Category</label>
                   <select 
                     value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   >
                     {CATEGORIES.map(cat => (
                       <option key={cat.name} value={cat.name}>{cat.name} (Commission: {cat.commission}%)</option>
@@ -829,7 +829,7 @@ export default function Dashboard() {
                   <label className="block text-sm font-bold text-gray-900 mb-1">Condition</label>
                   <select 
                     value={newProduct.condition} onChange={e => setNewProduct({...newProduct, condition: e.target.value})}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   >
                     <option value="New">New</option>
                     <option value="Used">Used</option>
@@ -842,7 +842,7 @@ export default function Dashboard() {
                   <label className="block text-sm font-bold text-gray-900 mb-1">Color (Optional)</label>
                   <input 
                     type="text" value={newProduct.color} onChange={e => setNewProduct({...newProduct, color: e.target.value})}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     placeholder="e.g. Black, Red"
                   />
                 </div>
@@ -850,7 +850,7 @@ export default function Dashboard() {
                   <label className="block text-sm font-bold text-gray-900 mb-1">Size (Optional)</label>
                   <input 
                     type="text" value={newProduct.size} onChange={e => setNewProduct({...newProduct, size: e.target.value})}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     placeholder="e.g. M, L, 42"
                   />
                 </div>
@@ -859,14 +859,14 @@ export default function Dashboard() {
                 <label className="block text-sm font-bold text-gray-900 mb-1">Image URL (Optional)</label>
                 <input 
                   type="url" value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
               <div className="pt-4">
                 <button 
                   type="submit" disabled={addingProduct}
-                  className="w-full rounded-full bg-indigo-600 py-3 text-base font-bold text-white hover:bg-indigo-700 transition-all disabled:opacity-50"
+                  className="w-full rounded-full bg-emerald-700 py-3 text-base font-bold text-white hover:bg-emerald-800 transition-all disabled:opacity-50"
                 >
                   {addingProduct ? 'Adding...' : 'Submit for Approval'}
                 </button>

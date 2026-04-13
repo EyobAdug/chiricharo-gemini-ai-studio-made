@@ -141,7 +141,7 @@ export default function Register() {
                 type="button"
                 onClick={() => setRole('buyer')}
                 className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
-                  role === 'buyer' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 bg-white text-gray-600 hover:border-indigo-200'
+                  role === 'buyer' ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-200'
                 }`}
               >
                 <ShoppingBag className="h-6 w-6 mb-2" />
@@ -151,7 +151,7 @@ export default function Register() {
                 type="button"
                 onClick={() => setRole('seller')}
                 className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
-                  role === 'seller' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 bg-white text-gray-600 hover:border-indigo-200'
+                  role === 'seller' ? 'border-emerald-600 bg-emerald-50 text-emerald-700' : 'border-gray-200 bg-white text-gray-600 hover:border-emerald-200'
                 }`}
               >
                 <Store className="h-6 w-6 mb-2" />
@@ -164,7 +164,7 @@ export default function Register() {
             <button
               onClick={handleGoogleRegister}
               disabled={loading}
-              className="w-full flex justify-center py-4 px-4 border border-gray-300 rounded-xl shadow-sm text-base font-bold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-50 active:scale-[0.98]"
+              className="w-full flex justify-center py-4 px-4 border border-gray-300 rounded-xl shadow-sm text-base font-bold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all disabled:opacity-50 active:scale-[0.98]"
             >
               <svg className="h-6 w-6 mr-3" viewBox="0 0 24 24">
                 <path
@@ -191,7 +191,7 @@ export default function Register() {
 
         <p className="mt-8 text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link to="/login" className="font-bold text-indigo-600 hover:text-indigo-500">
+          <Link to="/login" className="font-bold text-emerald-600 hover:text-emerald-500">
             {t('nav.login')}
           </Link>
         </p>

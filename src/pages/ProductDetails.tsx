@@ -184,7 +184,7 @@ export default function ProductDetails() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
       </div>
     );
   }
@@ -193,7 +193,7 @@ export default function ProductDetails() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Product Not Found</h1>
-        <button onClick={() => navigate('/explore')} className="text-indigo-600 font-bold hover:underline">
+        <button onClick={() => navigate('/explore')} className="text-emerald-700 font-bold hover:underline">
           Back to Explore
         </button>
       </div>
@@ -204,7 +204,7 @@ export default function ProductDetails() {
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
       <button 
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors mb-8"
+        className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-emerald-700 transition-colors mb-8"
       >
         <ArrowLeft className="h-4 w-4" /> Back
       </button>
@@ -226,7 +226,7 @@ export default function ProductDetails() {
           </div>
           <div className="grid grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="aspect-square rounded-xl bg-gray-100 overflow-hidden cursor-pointer hover:ring-2 hover:ring-indigo-600 transition-all">
+              <div key={i} className="aspect-square rounded-xl bg-gray-100 overflow-hidden cursor-pointer hover:ring-2 hover:ring-emerald-600 transition-all">
                 <img src={`https://picsum.photos/seed/${product.id + i}/200/200`} alt="" className="h-full w-full object-cover" />
               </div>
             ))}
@@ -234,10 +234,15 @@ export default function ProductDetails() {
         </motion.div>
 
         {/* Product Info */}
-        <div className="flex flex-col">
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-col"
+        >
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-indigo-600">
+              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-700">
                 {product.category}
               </span>
               <div className="flex gap-2">
@@ -266,7 +271,7 @@ export default function ProductDetails() {
               <span className="text-sm text-gray-400">|</span>
               <span className="text-sm text-gray-500 font-medium">{product.reviews || 0} verified reviews</span>
             </div>
-            <p className="text-3xl font-black text-indigo-600 mb-8">{product.price} {t('product.price')}</p>
+            <p className="text-3xl font-black text-emerald-700 mb-8">{product.price} {t('product.price')}</p>
             <p className="text-gray-600 leading-relaxed mb-8">
               {product.description}
             </p>
@@ -328,7 +333,7 @@ export default function ProductDetails() {
             <button 
               onClick={handleAddToCart}
               disabled={product.stock <= 0}
-              className="w-full rounded-full bg-indigo-600 py-5 text-lg font-bold text-white hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-full bg-emerald-700 py-5 text-lg font-bold text-white hover:bg-emerald-800 transition-all shadow-xl shadow-emerald-100 flex items-center justify-center gap-3 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ShoppingCart className="h-6 w-6" /> {product.stock > 0 ? t('product.addToCart') : t('product.outOfStock')}
             </button>
@@ -336,35 +341,35 @@ export default function ProductDetails() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-10 border-t border-gray-100">
             <div className="flex flex-col items-center text-center gap-2">
-              <div className="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center">
-                <Truck className="h-5 w-5 text-indigo-600" />
+              <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                <Truck className="h-5 w-5 text-emerald-700" />
               </div>
               <p className="text-xs font-bold text-gray-900">Fast Delivery</p>
               <p className="text-[10px] text-gray-500">Across Ethiopia</p>
             </div>
             <div className="flex flex-col items-center text-center gap-2">
-              <div className="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center">
-                <RotateCcw className="h-5 w-5 text-indigo-600" />
+              <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                <RotateCcw className="h-5 w-5 text-emerald-700" />
               </div>
               <p className="text-xs font-bold text-gray-900">Verified Sellers</p>
               <p className="text-[10px] text-gray-500">Quality guaranteed</p>
             </div>
             <div className="flex flex-col items-center text-center gap-2">
-              <div className="h-10 w-10 rounded-full bg-indigo-50 flex items-center justify-center">
-                <ShieldCheck className="h-5 w-5 text-indigo-600" />
+              <div className="h-10 w-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                <ShieldCheck className="h-5 w-5 text-emerald-700" />
               </div>
               <p className="text-xs font-bold text-gray-900">Secure Payment</p>
               <p className="text-[10px] text-gray-500">Cash on delivery available</p>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Reviews Section */}
       <div className="mt-20 border-t border-gray-100 pt-16">
         <div className="flex items-center justify-between mb-10">
           <h2 className="text-3xl font-extrabold text-gray-900 flex items-center gap-3">
-            <MessageSquare className="h-8 w-8 text-indigo-600" />
+            <MessageSquare className="h-8 w-8 text-emerald-700" />
             Customer Reviews
           </h2>
         </div>
@@ -380,7 +385,7 @@ export default function ProductDetails() {
                   <p className="text-gray-600 mb-4">Please log in to leave a review.</p>
                   <button 
                     onClick={() => navigate('/login')}
-                    className="rounded-full bg-indigo-600 px-6 py-2 text-sm font-bold text-white hover:bg-indigo-700 transition-all"
+                    className="rounded-full bg-emerald-700 px-6 py-2 text-sm font-bold text-white hover:bg-emerald-800 transition-all"
                   >
                     Log In
                   </button>
@@ -413,7 +418,7 @@ export default function ProductDetails() {
                       value={reviewText}
                       onChange={(e) => setReviewText(e.target.value)}
                       rows={4}
-                      className="w-full rounded-xl border border-gray-200 bg-white py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all resize-none"
+                      className="w-full rounded-xl border border-gray-200 bg-white py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all resize-none"
                       placeholder="What did you like or dislike?"
                     />
                   </div>
@@ -421,7 +426,7 @@ export default function ProductDetails() {
                   <button 
                     type="submit"
                     disabled={submittingReview}
-                    className="w-full rounded-full bg-indigo-600 py-3 text-sm font-bold text-white hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100 disabled:opacity-50"
+                    className="w-full rounded-full bg-emerald-700 py-3 text-sm font-bold text-white hover:bg-emerald-800 transition-all shadow-md shadow-emerald-100 disabled:opacity-50"
                   >
                     {submittingReview ? 'Submitting...' : 'Submit Review'}
                   </button>
@@ -448,8 +453,8 @@ export default function ProductDetails() {
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                        <span className="text-indigo-600 font-bold text-sm">
+                      <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <span className="text-emerald-700 font-bold text-sm">
                           {review.userName.charAt(0).toUpperCase()}
                         </span>
                       </div>

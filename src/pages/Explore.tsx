@@ -80,14 +80,14 @@ export default function Explore() {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all shadow-sm"
+                className="w-full rounded-full border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all shadow-sm"
               />
             </div>
             <button 
               onClick={() => setShowFilters(!showFilters)}
               className={cn(
                 "p-2.5 rounded-full border transition-all md:hidden",
-                showFilters ? "bg-indigo-600 border-indigo-600 text-white" : "bg-white border-gray-200 text-gray-600"
+                showFilters ? "bg-emerald-700 border-emerald-700 text-white" : "bg-white border-gray-200 text-gray-600"
               )}
             >
               <Filter className="h-5 w-5" />
@@ -108,7 +108,7 @@ export default function Explore() {
                     className={cn(
                       "block w-full text-left px-4 py-2 rounded-xl text-sm font-medium transition-all",
                       selectedCategory === cat 
-                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-100" 
+                        ? "bg-emerald-700 text-white shadow-md shadow-emerald-100" 
                         : "text-gray-600 hover:bg-gray-100"
                     )}
                   >
@@ -123,7 +123,7 @@ export default function Explore() {
               <select 
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none transition-all"
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none transition-all"
               >
                 <option value="featured">Featured</option>
                 <option value="price-low">Price: Low to High</option>
@@ -152,7 +152,7 @@ export default function Explore() {
                         className={cn(
                           "px-4 py-2 rounded-full text-xs font-bold transition-all",
                           selectedCategory === cat 
-                            ? "bg-indigo-600 text-white" 
+                            ? "bg-emerald-700 text-white" 
                             : "bg-gray-100 text-gray-600"
                         )}
                       >
@@ -167,7 +167,7 @@ export default function Explore() {
             {/* Results Grid */}
             {loading ? (
               <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -178,7 +178,7 @@ export default function Explore() {
                 <p className="text-gray-500 max-w-xs">Try adjusting your search or filters to find what you're looking for.</p>
                 <button 
                   onClick={() => { setSearchQuery(""); setSelectedCategory("All"); }}
-                  className="mt-6 text-indigo-600 font-bold hover:underline"
+                  className="mt-6 text-emerald-700 font-bold hover:underline"
                 >
                   Clear all filters
                 </button>
@@ -191,7 +191,7 @@ export default function Explore() {
                     key={product.id}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="group relative flex flex-col rounded-2xl border border-gray-100 bg-white p-3 transition-all hover:shadow-xl hover:border-indigo-100"
+                    className="group relative flex flex-col rounded-2xl border border-gray-100 bg-white p-3 transition-all hover:shadow-xl hover:border-emerald-100"
                   >
                     <Link to={`/product/${product.id}`} className="relative aspect-square overflow-hidden rounded-xl bg-gray-100 block">
                       <img 
@@ -209,9 +209,9 @@ export default function Explore() {
                     <div className="mt-4 px-2 pb-2">
                       <div className="flex items-center justify-between mb-1">
                         <Link to={`/product/${product.id}`}>
-                          <h3 className="text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1">{product.name}</h3>
+                          <h3 className="text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition-colors line-clamp-1">{product.name}</h3>
                         </Link>
-                        <p className="text-sm font-black text-indigo-600">{product.price} {t('product.price')}</p>
+                        <p className="text-sm font-black text-emerald-700">{product.price} {t('product.price')}</p>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="flex items-center text-yellow-400">
@@ -222,7 +222,7 @@ export default function Explore() {
                       </div>
                       <button 
                         onClick={() => handleAddToCart(product)}
-                        className="mt-4 w-full rounded-xl bg-gray-900 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-600 active:scale-95 flex items-center justify-center gap-2"
+                        className="mt-4 w-full rounded-xl bg-gray-900 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-700 active:scale-95 flex items-center justify-center gap-2"
                       >
                         <ShoppingCart className="h-4 w-4" /> {t('product.addToCart')}
                       </button>

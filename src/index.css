@@ -1,1 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  
+  /* Overriding indigo to an Ethiopian Green palette */
+  --color-indigo-50: #ecfdf5;
+  --color-indigo-100: #d1fae5;
+  --color-indigo-200: #a7f3d0;
+  --color-indigo-300: #6ee7b7;
+  --color-indigo-400: #34d399;
+  --color-indigo-500: #10b981;
+  --color-indigo-600: #047857;
+  --color-indigo-700: #065f46;
+  --color-indigo-800: #064e3b;
+  --color-indigo-900: #022c22;
+}
+
+.ethiopian-border {
+  height: 4px;
+  background: linear-gradient(to right, #078930 33.33%, #FCD116 33.33%, #FCD116 66.66%, #DA121A 66.66%);
+}

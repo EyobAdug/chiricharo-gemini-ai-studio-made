@@ -97,7 +97,7 @@ export default function App() {
                     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
                       <h1 className="text-4xl font-bold text-gray-900 mb-4">Page Not Found</h1>
                       <p className="text-gray-600 mb-8 max-w-md">The page you are looking for doesn't exist or has been moved.</p>
-                      <a href="/" className="rounded-full bg-indigo-600 px-8 py-3 text-white font-bold hover:bg-indigo-700 transition-all">
+                      <a href="/" className="rounded-full bg-emerald-700 px-8 py-3 text-white font-bold hover:bg-emerald-800 transition-all">
                         Back to Home
                       </a>
                     </div>

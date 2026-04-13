@@ -33,14 +33,14 @@ export default function Cart() {
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center"
         >
-          <div className="h-24 w-24 rounded-full bg-indigo-50 flex items-center justify-center mb-8">
-            <ShoppingBag className="h-12 w-12 text-indigo-600" />
+          <div className="h-24 w-24 rounded-full bg-emerald-50 flex items-center justify-center mb-8">
+            <ShoppingBag className="h-12 w-12 text-emerald-700" />
           </div>
           <h1 className="text-3xl font-extrabold text-gray-900 mb-4">{t('cart.empty')}</h1>
           <p className="text-gray-600 mb-10 max-w-md mx-auto leading-relaxed">
             Looks like you haven't added anything to your cart yet. Explore our marketplace to find amazing deals!
           </p>
-          <Link to="/explore" className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-10 py-4 text-base font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
+          <Link to="/explore" className="inline-flex items-center justify-center rounded-full bg-emerald-700 px-10 py-4 text-base font-bold text-white hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-100">
             Start Shopping
           </Link>
         </motion.div>
@@ -92,19 +92,19 @@ export default function Cart() {
                     <div className="flex items-center gap-3 bg-gray-50 rounded-full px-3 py-1 border border-gray-100">
                       <button 
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-1 text-gray-600 hover:text-indigo-600"
+                        className="p-1 text-gray-600 hover:text-emerald-700"
                       >
                         <Minus className="h-4 w-4" />
                       </button>
                       <span className="text-sm font-bold w-6 text-center">{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-1 text-gray-600 hover:text-indigo-600"
+                        className="p-1 text-gray-600 hover:text-emerald-700"
                       >
                         <Plus className="h-4 w-4" />
                       </button>
                     </div>
-                    <p className="text-lg font-black text-indigo-600">{(item.price * item.quantity).toFixed(2)} {t('product.price')}</p>
+                    <p className="text-lg font-black text-emerald-700">{(item.price * item.quantity).toFixed(2)} {t('product.price')}</p>
                   </div>
                 </div>
               </motion.div>
@@ -137,18 +137,18 @@ export default function Cart() {
 
             <button 
               onClick={handleCheckout}
-              className="w-full rounded-full bg-indigo-600 py-4 text-base font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2 mb-6"
+              className="w-full rounded-full bg-emerald-700 py-4 text-base font-bold text-white hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-100 flex items-center justify-center gap-2 mb-6"
             >
               {t('cart.checkout')} <ArrowRight className="h-5 w-5" />
             </button>
 
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-xs text-gray-500">
-                <ShieldCheck className="h-4 w-4 text-indigo-600" />
+                <ShieldCheck className="h-4 w-4 text-emerald-700" />
                 <span>Secure SSL encrypted payment</span>
               </div>
               <div className="flex items-center gap-3 text-xs text-gray-500">
-                <Truck className="h-4 w-4 text-indigo-600" />
+                <Truck className="h-4 w-4 text-emerald-700" />
                 <span>Fast delivery on all orders</span>
               </div>
             </div>
