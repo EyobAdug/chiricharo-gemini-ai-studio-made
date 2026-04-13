@@ -6,6 +6,7 @@ import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, addDoc, s
 import { db } from '../firebase';
 import { CATEGORIES } from '../constants';
 import { Package, Users, ShoppingBag, CheckCircle, XCircle, Plus, Edit, Trash2, X, LayoutDashboard } from 'lucide-react';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 export default function Dashboard() {
   const { profile } = useAuth();
@@ -274,17 +275,40 @@ export default function Dashboard() {
     const totalOrders = orders.length;
     
     let totalEarnings = 0;
+    
+    // Prepare chart data (Earnings over time)
+    const chartDataMap: Record<string, number> = {};
+
     if (profile?.role === 'admin') {
       totalEarnings = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+      
+      orders.forEach(order => {
+        const date = new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        if (!chartDataMap[date]) chartDataMap[date] = 0;
+        chartDataMap[date] += (order.totalAmount || 0);
+      });
     } else {
       orders.forEach(order => {
+        let orderEarnings = 0;
         order.items.forEach((item: any) => {
           if (item.sellerId === profile?.uid) {
-            totalEarnings += (item.price * item.quantity);
+            orderEarnings += (item.price * item.quantity);
           }
         });
+        totalEarnings += orderEarnings;
+        
+        if (orderEarnings > 0) {
+          const date = new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+          if (!chartDataMap[date]) chartDataMap[date] = 0;
+          chartDataMap[date] += orderEarnings;
+        }
       });
     }
+
+    const chartData = Object.keys(chartDataMap).map(date => ({
+      date,
+      earnings: chartDataMap[date]
+    })).reverse(); // Chronological order
 
     const recentOrders = orders.slice(0, 5);
 
@@ -316,6 +340,44 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {chartData.length > 0 && (
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mt-8">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Earnings Overview</h3>
+            <div className="h-72 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                  <XAxis 
+                    dataKey="date" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#6b7280', fontSize: 12 }} 
+                    dy={10}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                    tickFormatter={(value) => `${value}`}
+                  />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    formatter={(value: number) => [`${value.toFixed(2)} ETB`, 'Earnings']}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="earnings" 
+                    stroke="#4f46e5" 
+                    strokeWidth={3} 
+                    dot={{ fill: '#4f46e5', strokeWidth: 2, r: 4 }} 
+                    activeDot={{ r: 6, strokeWidth: 0 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
 
         <h3 className="text-lg font-bold text-gray-900 mt-8 mb-4">{t('dashboard.recentOrders')}</h3>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
