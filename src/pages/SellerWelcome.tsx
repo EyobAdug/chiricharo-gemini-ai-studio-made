@@ -20,7 +20,7 @@ export default function SellerWelcome() {
 
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           <div className="flex flex-col items-center text-center">
-            <div className="h-16 w-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 text-indigo-600">
+            <div className="h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4 text-emerald-700">
               <Package className="h-8 w-8" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">1. Add Products</h3>
@@ -30,7 +30,7 @@ export default function SellerWelcome() {
           </div>
 
           <div className="flex flex-col items-center text-center">
-            <div className="h-16 w-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 text-indigo-600">
+            <div className="h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4 text-emerald-700">
               <Truck className="h-8 w-8" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">2. Fulfill Orders</h3>
@@ -40,7 +40,7 @@ export default function SellerWelcome() {
           </div>
 
           <div className="flex flex-col items-center text-center">
-            <div className="h-16 w-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 text-indigo-600">
+            <div className="h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4 text-emerald-700">
               <DollarSign className="h-8 w-8" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">3. Get Paid</h3>
@@ -53,13 +53,13 @@ export default function SellerWelcome() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link 
             to="/dashboard" 
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-8 py-4 text-base font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-700 px-8 py-4 text-base font-bold text-white hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-100"
           >
             Go to Dashboard <ArrowRight className="h-5 w-5" />
           </Link>
           <Link 
             to="/seller-guide" 
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-100 px-8 py-4 text-base font-bold text-indigo-700 hover:bg-indigo-200 transition-all"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-100 px-8 py-4 text-base font-bold text-emerald-800 hover:bg-emerald-200 transition-all"
           >
             Read Seller Guide
           </Link>

@@ -50,12 +50,12 @@ export default function SellerVerification() {
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
       <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-        <div className="bg-indigo-600 px-8 py-12 text-center text-white">
+        <div className="bg-emerald-700 px-8 py-12 text-center text-white">
           <div className="mx-auto h-16 w-16 bg-white/20 rounded-full flex items-center justify-center mb-6 backdrop-blur-sm">
             <ShieldCheck className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-extrabold mb-4">{t('seller.info.title')}</h1>
-          <p className="text-indigo-100 max-w-xl mx-auto leading-relaxed">
+          <p className="text-emerald-50 max-w-xl mx-auto leading-relaxed">
             {t('seller.info.desc')}
           </p>
         </div>
@@ -78,7 +78,7 @@ export default function SellerVerification() {
                   required
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
                   placeholder="123 Main St, Addis Ababa"
                 />
               </div>
@@ -93,7 +93,7 @@ export default function SellerVerification() {
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
                   placeholder="+251 911 234 567"
                 />
               </div>
@@ -108,7 +108,7 @@ export default function SellerVerification() {
                   rows={4}
                   value={verificationDetails}
                   onChange={(e) => setVerificationDetails(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
                   placeholder="Business License Number, TIN, etc."
                 />
               </div>
@@ -117,7 +117,7 @@ export default function SellerVerification() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-indigo-600 py-4 text-base font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-full bg-emerald-700 py-4 text-base font-bold text-white hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? '...' : t('seller.info.submit')}
             </button>

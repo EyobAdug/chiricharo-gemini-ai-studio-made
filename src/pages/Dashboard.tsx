@@ -900,7 +900,7 @@ export default function Dashboard() {
                   value={actionReason} 
                   onChange={e => setActionReason(e.target.value)}
                   placeholder={`Please provide a reason why this account is being ${userAction}ed...`}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
               </div>
               
@@ -973,7 +973,7 @@ export default function Dashboard() {
               
               <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                 <p className="font-bold text-gray-500">Total Amount</p>
-                <p className="text-2xl font-black text-indigo-600">{selectedOrder.totalAmount.toFixed(2)} ETB</p>
+                <p className="text-2xl font-black text-emerald-700">{selectedOrder.totalAmount.toFixed(2)} ETB</p>
               </div>
             </div>
           </div>
@@ -994,15 +994,15 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-bold text-gray-900 mb-1">Product Name</label>
-                  <input required type="text" value={editingProduct.name} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                  <input required type="text" value={editingProduct.name} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-bold text-gray-900 mb-1">Description</label>
-                  <textarea required rows={3} value={editingProduct.description} onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                  <textarea required rows={3} value={editingProduct.description} onChange={e => setEditingProduct({...editingProduct, description: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Price (ETB)</label>
-                  <input required type="number" value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                  <input required type="number" value={editingProduct.price} onChange={e => setEditingProduct({...editingProduct, price: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
                   {editingProduct.price && editingProduct.category && (
                     <p className="text-xs text-green-600 mt-1 font-bold">
                       You earn: {(Number(editingProduct.price) * (1 - (CATEGORIES.find(c => c.name === editingProduct.category)?.commission || 0) / 100)).toFixed(2)} ETB
@@ -1011,11 +1011,11 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Stock</label>
-                  <input required type="number" value={editingProduct.stock} onChange={e => setEditingProduct({...editingProduct, stock: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                  <input required type="number" value={editingProduct.stock} onChange={e => setEditingProduct({...editingProduct, stock: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Category</label>
-                  <select value={editingProduct.category} onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                  <select value={editingProduct.category} onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
                     {CATEGORIES.map(cat => (
                       <option key={cat.name} value={cat.name}>{cat.name} (Commission: {cat.commission}%)</option>
                     ))}
@@ -1023,7 +1023,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Condition</label>
-                  <select value={editingProduct.condition} onChange={e => setEditingProduct({...editingProduct, condition: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                  <select value={editingProduct.condition} onChange={e => setEditingProduct({...editingProduct, condition: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500">
                     <option>New</option>
                     <option>Used - Like New</option>
                     <option>Used - Good</option>
@@ -1032,15 +1032,15 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Color (Optional)</label>
-                  <input type="text" value={editingProduct.color} onChange={e => setEditingProduct({...editingProduct, color: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                  <input type="text" value={editingProduct.color} onChange={e => setEditingProduct({...editingProduct, color: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-900 mb-1">Size (Optional)</label>
-                  <input type="text" value={editingProduct.size} onChange={e => setEditingProduct({...editingProduct, size: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                  <input type="text" value={editingProduct.size} onChange={e => setEditingProduct({...editingProduct, size: e.target.value})} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
                 </div>
               </div>
               <div className="pt-4">
-                <button type="submit" disabled={updatingProduct} className="w-full rounded-full bg-indigo-600 py-3 text-base font-bold text-white hover:bg-indigo-700 transition-all disabled:opacity-50">
+                <button type="submit" disabled={updatingProduct} className="w-full rounded-full bg-emerald-700 py-3 text-base font-bold text-white hover:bg-emerald-800 transition-all disabled:opacity-50">
                   {updatingProduct ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
@@ -1072,7 +1072,7 @@ export default function Dashboard() {
                   value={deleteReason} 
                   onChange={e => setDeleteReason(e.target.value)}
                   placeholder="Please provide a reason (e.g., Out of stock, Discontinued)..."
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">This reason will be sent to the platform administrators.</p>
               </div>

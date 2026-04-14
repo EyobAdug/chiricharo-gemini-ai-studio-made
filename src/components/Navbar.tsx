@@ -60,7 +60,7 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
             <Link to="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-emerald-700 flex items-center justify-center">
                 <ShoppingCart className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold tracking-tight text-gray-900">{t('app.name')}</span>
@@ -68,7 +68,7 @@ export default function Navbar() {
             
             <div className="hidden md:block">
               <div className="flex items-center gap-6">
-                <Link to="/explore" className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors">{t('nav.explore')}</Link>
+                <Link to="/explore" className="text-sm font-medium text-gray-600 hover:text-emerald-700 transition-colors">{t('nav.explore')}</Link>
               </div>
             </div>
           </div>
@@ -79,7 +79,7 @@ export default function Navbar() {
               <input
                 type="text"
                 placeholder="Search products..."
-                className="w-full rounded-full border border-gray-200 bg-gray-50 py-2 pl-10 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all"
+                className="w-full rounded-full border border-gray-200 bg-gray-50 py-2 pl-10 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
               />
             </div>
           </div>
@@ -114,7 +114,7 @@ export default function Navbar() {
                     <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                       <h3 className="font-bold text-gray-900">Notifications</h3>
                       {unreadCount > 0 && (
-                        <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
+                        <span className="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">
                           {unreadCount} new
                         </span>
                       )}
@@ -129,7 +129,7 @@ export default function Navbar() {
                           {notifications.map((notif) => (
                             <div 
                               key={notif.id} 
-                              className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${!notif.read ? 'bg-indigo-50/30' : ''}`}
+                              className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${!notif.read ? 'bg-emerald-50/30' : ''}`}
                               onClick={() => {
                                 if (!notif.read) markAsRead(notif.id);
                                 if (notif.link) {
@@ -142,7 +142,7 @@ export default function Navbar() {
                                 <h4 className={`text-sm font-bold ${!notif.read ? 'text-gray-900' : 'text-gray-700'}`}>
                                   {notif.title}
                                 </h4>
-                                {!notif.read && <span className="h-2 w-2 rounded-full bg-indigo-600 mt-1.5 shrink-0"></span>}
+                                {!notif.read && <span className="h-2 w-2 rounded-full bg-emerald-700 mt-1.5 shrink-0"></span>}
                               </div>
                               <p className="text-xs text-gray-600 mb-2 line-clamp-2">{notif.message}</p>
                               <span className="text-[10px] font-medium text-gray-400">
@@ -161,7 +161,7 @@ export default function Navbar() {
             <Link to="/cart" className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors relative">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
+                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-700 text-[10px] font-bold text-white">
                   {cartCount}
                 </span>
               )}
@@ -170,8 +170,8 @@ export default function Navbar() {
             {user ? (
               <div className="hidden md:flex items-center gap-4 ml-2 pl-4 border-l border-gray-200">
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                    <User className="h-4 w-4 text-indigo-600" />
+                  <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <User className="h-4 w-4 text-emerald-700" />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xs font-bold text-gray-900 leading-none">{profile?.name || 'User'}</span>
@@ -195,8 +195,8 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="hidden md:flex items-center gap-4 ml-2">
-                <Link to="/login" className="text-sm font-bold text-gray-600 hover:text-indigo-600">{t('nav.login')}</Link>
-                <Link to="/register" className="text-sm font-bold bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition-colors">{t('nav.register')}</Link>
+                <Link to="/login" className="text-sm font-bold text-gray-600 hover:text-emerald-700">{t('nav.login')}</Link>
+                <Link to="/register" className="text-sm font-bold bg-emerald-700 text-white px-4 py-2 rounded-full hover:bg-emerald-800 transition-colors">{t('nav.register')}</Link>
               </div>
             )}
 
@@ -213,29 +213,29 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-4 animate-in slide-in-from-top duration-300">
-          <Link to="/explore" className="block text-base font-medium text-gray-600 hover:text-indigo-600">{t('nav.explore')}</Link>
+          <Link to="/explore" className="block text-base font-medium text-gray-600 hover:text-emerald-700">{t('nav.explore')}</Link>
           <hr className="border-gray-100" />
           {user ? (
             <>
               <div className="flex items-center gap-3 py-2 border-b border-gray-100 mb-2">
-                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                  <User className="h-5 w-5 text-indigo-600" />
+                <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <User className="h-5 w-5 text-emerald-700" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-bold text-gray-900">{profile?.name || 'User'}</span>
                   <span className="text-xs text-gray-500">{user.email}</span>
                 </div>
               </div>
-              <Link to="/profile" className="block text-base font-medium text-gray-600 hover:text-indigo-600">{t('nav.profile') || 'Manage Account'}</Link>
+              <Link to="/profile" className="block text-base font-medium text-gray-600 hover:text-emerald-700">{t('nav.profile') || 'Manage Account'}</Link>
               {(profile?.role === 'admin' || profile?.role === 'seller') && (
-                <Link to="/dashboard" className="block text-base font-medium text-gray-600 hover:text-indigo-600">{t('nav.dashboard')}</Link>
+                <Link to="/dashboard" className="block text-base font-medium text-gray-600 hover:text-emerald-700">{t('nav.dashboard')}</Link>
               )}
               <button onClick={handleLogout} className="block w-full text-left text-base font-medium text-red-600 hover:text-red-700">{t('nav.logout')}</button>
             </>
           ) : (
             <>
-              <Link to="/login" className="block text-base font-medium text-gray-600 hover:text-indigo-600">{t('nav.login')}</Link>
-              <Link to="/register" className="block text-base font-medium text-indigo-600 hover:text-indigo-700">{t('nav.register')}</Link>
+              <Link to="/login" className="block text-base font-medium text-gray-600 hover:text-emerald-700">{t('nav.login')}</Link>
+              <Link to="/register" className="block text-base font-medium text-emerald-700 hover:text-emerald-800">{t('nav.register')}</Link>
             </>
           )}
         </div>

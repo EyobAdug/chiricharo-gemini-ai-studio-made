@@ -16,9 +16,9 @@ export default function SellerGuide() {
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center justify-center p-4 bg-indigo-100 rounded-full mb-4"
+            className="inline-flex items-center justify-center p-4 bg-emerald-100 rounded-full mb-4"
           >
-            <DollarSign className="h-10 w-10 text-indigo-600" />
+            <DollarSign className="h-10 w-10 text-emerald-700" />
           </motion.div>
           <h1 className="text-4xl font-black text-gray-900 tracking-tight">Seller Welcome Guide</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -29,19 +29,19 @@ export default function SellerGuide() {
         {/* How You Earn */}
         <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
           <div className="flex items-center gap-3 mb-6">
-            <Percent className="h-8 w-8 text-indigo-600" />
+            <Percent className="h-8 w-8 text-emerald-700" />
             <h2 className="text-2xl font-bold text-gray-900">How You Earn Money</h2>
           </div>
-          <div className="prose prose-indigo max-w-none text-gray-600">
+          <div className="prose prose-emerald max-w-none text-gray-600">
             <p className="text-lg">
               Our platform operates on a simple commission-based model. <strong>You only pay when you sell.</strong> There are no hidden fees, no listing fees, and no monthly subscriptions.
             </p>
             <p className="text-lg">
               When a customer buys your product, the platform takes a small percentage of the sale price to cover marketing, payment processing, and platform maintenance. The rest goes directly to you!
             </p>
-            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-6 mt-6">
-              <h3 className="text-indigo-900 font-bold mb-2">Example:</h3>
-              <p className="text-indigo-800 m-0">
+            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-6 mt-6">
+              <h3 className="text-emerald-900 font-bold mb-2">Example:</h3>
+              <p className="text-emerald-800 m-0">
                 If you sell a <strong>Mobile Phone</strong> for <strong>10,000 ETB</strong> (8% commission):<br/>
                 Platform Fee: 800 ETB<br/>
                 <strong>You Earn: 9,200 ETB</strong>
@@ -53,7 +53,7 @@ export default function SellerGuide() {
         {/* Commission Rates */}
         <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
           <div className="flex items-center gap-3 mb-6">
-            <Package className="h-8 w-8 text-indigo-600" />
+            <Package className="h-8 w-8 text-emerald-700" />
             <h2 className="text-2xl font-bold text-gray-900">Commission Rates by Category</h2>
           </div>
           <p className="text-gray-600 mb-6">
@@ -72,7 +72,7 @@ export default function SellerGuide() {
                   <tr key={cat.name} className="hover:bg-gray-50 transition-colors">
                     <td className="py-4 px-4 text-gray-700 font-medium">{cat.name}</td>
                     <td className="py-4 px-4 text-right">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 font-bold">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 font-bold">
                         {cat.commission}%
                       </span>
                     </td>
@@ -87,20 +87,20 @@ export default function SellerGuide() {
         <div className="grid md:grid-cols-2 gap-8">
           <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <ShieldCheck className="h-8 w-8 text-indigo-600" />
+              <ShieldCheck className="h-8 w-8 text-emerald-700" />
               <h2 className="text-xl font-bold text-gray-900">Order Handling</h2>
             </div>
             <ul className="space-y-4 text-gray-600">
               <li className="flex gap-3">
-                <span className="font-bold text-indigo-600">1.</span>
+                <span className="font-bold text-emerald-700">1.</span>
                 <span>You will receive an email and an in-app notification when a new order is placed.</span>
               </li>
               <li className="flex gap-3">
-                <span className="font-bold text-indigo-600">2.</span>
+                <span className="font-bold text-emerald-700">2.</span>
                 <span>Prepare the item for shipping within 24 hours.</span>
               </li>
               <li className="flex gap-3">
-                <span className="font-bold text-indigo-600">3.</span>
+                <span className="font-bold text-emerald-700">3.</span>
                 <span>Update the order status in your Dashboard to "Processing" and then "Shipped".</span>
               </li>
             </ul>
@@ -108,20 +108,20 @@ export default function SellerGuide() {
 
           <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <CreditCard className="h-8 w-8 text-indigo-600" />
+              <CreditCard className="h-8 w-8 text-emerald-700" />
               <h2 className="text-xl font-bold text-gray-900">Payment Process</h2>
             </div>
             <ul className="space-y-4 text-gray-600">
               <li className="flex gap-3">
-                <span className="font-bold text-indigo-600">1.</span>
+                <span className="font-bold text-emerald-700">1.</span>
                 <span>Funds are held securely in escrow until the buyer receives the item.</span>
               </li>
               <li className="flex gap-3">
-                <span className="font-bold text-indigo-600">2.</span>
+                <span className="font-bold text-emerald-700">2.</span>
                 <span>Once marked as "Delivered", funds are released to your seller account.</span>
               </li>
               <li className="flex gap-3">
-                <span className="font-bold text-indigo-600">3.</span>
+                <span className="font-bold text-emerald-700">3.</span>
                 <span>Payouts are processed every Friday to your registered bank account.</span>
               </li>
             </ul>

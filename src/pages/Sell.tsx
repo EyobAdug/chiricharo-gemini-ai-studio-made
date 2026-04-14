@@ -16,15 +16,15 @@ export default function Sell() {
         <h1 className="text-4xl font-extrabold text-gray-900 mb-4">List Your Item</h1>
         <p className="text-gray-600 mb-8">Reach millions of buyers in minutes. It's free to list!</p>
         
-        <div className="bg-indigo-50 border border-indigo-100 rounded-3xl p-8 max-w-2xl mx-auto">
-          <Package className="h-16 w-16 text-indigo-600 mx-auto mb-4" />
+        <div className="bg-emerald-50 border border-emerald-100 rounded-3xl p-8 max-w-2xl mx-auto">
+          <Package className="h-16 w-16 text-emerald-700 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Product Management Moved</h2>
           <p className="text-gray-600 mb-8">
             Sellers can now manage and add new products directly from their Dashboard.
           </p>
           <button 
             onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-8 py-4 text-base font-bold text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+            className="inline-flex items-center justify-center rounded-full bg-emerald-700 px-8 py-4 text-base font-bold text-white hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-100"
           >
             Go to Dashboard
           </button>

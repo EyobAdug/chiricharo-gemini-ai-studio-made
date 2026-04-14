@@ -4,17 +4,18 @@
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   
-  /* Overriding indigo to an Ethiopian Green palette */
-  --color-indigo-50: #ecfdf5;
-  --color-indigo-100: #d1fae5;
-  --color-indigo-200: #a7f3d0;
-  --color-indigo-300: #6ee7b7;
-  --color-indigo-400: #34d399;
-  --color-indigo-500: #10b981;
-  --color-indigo-600: #047857;
-  --color-indigo-700: #065f46;
-  --color-indigo-800: #064e3b;
-  --color-indigo-900: #022c22;
+  /* Ethiopian Green palette */
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+  --color-emerald-800: #065f46;
+  --color-emerald-900: #064e3b;
+  --color-emerald-950: #022c22;
 }
 
 .ethiopian-border {
