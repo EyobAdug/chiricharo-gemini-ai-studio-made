@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Filter, SlidersHorizontal, Star, ShoppingCart, X, ChevronDown } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, Star, ShoppingCart, X, ChevronDown, Heart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '@/src/context/CartContext';
 import { useLanguage } from '@/src/context/LanguageContext';
@@ -17,7 +17,7 @@ export default function Explore() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, profile, toggleWishlist } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("featured");
@@ -206,6 +206,24 @@ export default function Explore() {
                         </span>
                       </div>
                     </Link>
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (!user) {
+                          navigate('/login');
+                          return;
+                        }
+                        toggleWishlist(product.id);
+                      }}
+                      className="absolute top-6 right-6 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-sm hover:bg-white transition-colors"
+                    >
+                      <Heart 
+                        className={cn(
+                          "h-5 w-5 transition-colors", 
+                          profile?.wishlist?.includes(product.id) ? "fill-red-500 text-red-500" : "text-gray-600 hover:text-red-500"
+                        )} 
+                      />
+                    </button>
                     <div className="mt-4 px-2 pb-2">
                       <div className="flex items-center justify-between mb-1">
                         <Link to={`/product/${product.id}`}>

@@ -13,6 +13,7 @@ export interface UserProfile {
   status?: 'active' | 'deleted' | 'suspended';
   deletionReason?: string;
   language: 'en' | 'am';
+  wishlist?: string[];
   sellerInfo?: {
     address: string;
     phone: string;
@@ -29,6 +30,7 @@ interface AuthContextType {
   isAuthReady: boolean;
   error?: string;
   refreshProfile: () => Promise<void>;
+  toggleWishlist: (productId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -86,6 +88,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const toggleWishlist = async (productId: string) => {
+    if (!user || !profile) return;
+    try {
+      const docRef = doc(db, 'users', user.uid);
+      const currentWishlist = profile.wishlist || [];
+      const newWishlist = currentWishlist.includes(productId)
+        ? currentWishlist.filter(id => id !== productId)
+        : [...currentWishlist, productId];
+      
+      await updateDoc(docRef, { wishlist: newWishlist });
+      setProfile({ ...profile, wishlist: newWishlist });
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
@@ -103,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, isAuthReady, error, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, isAuthReady, error, refreshProfile, toggleWishlist }}>
       {children}
     </AuthContext.Provider>
   );

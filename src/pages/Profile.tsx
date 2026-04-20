@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { doc, updateDoc, collection, query, where, getDocs, setDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
-import { User, Mail, Shield, MapPin, Phone, CheckCircle, Package, X, Trash2 } from 'lucide-react';
+import { User, Mail, Shield, MapPin, Phone, CheckCircle, Package, X, Trash2, Heart } from 'lucide-react';
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth();
   const { t } = useLanguage();
   
+  const [activeTab, setActiveTab] = useState<'orders' | 'wishlist'>('orders');
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
@@ -18,6 +20,9 @@ export default function Profile() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+  const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
+  const [loadingWishlist, setLoadingWishlist] = useState(false);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteReason, setDeleteReason] = useState('');
@@ -50,6 +55,76 @@ export default function Profile() {
     };
     fetchOrders();
   }, [user]);
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (!profile?.wishlist || profile.wishlist.length === 0) {
+        setWishlistProducts([]);
+        return;
+      }
+      setLoadingWishlist(true);
+      try {
+        // Firestore 'in' query supports up to 10 items. For a real app, we might need to chunk this.
+        // For MVP, we'll fetch all products and filter, or chunk if needed. Let's just fetch all and filter for simplicity if wishlist is large, or use chunking.
+        // Actually, fetching all products is bad. Let's chunk the wishlist array.
+        const chunks = [];
+        for (let i = 0; i < profile.wishlist.length; i += 10) {
+          chunks.push(profile.wishlist.slice(i, i + 10));
+        }
+        
+        let fetched: any[] = [];
+        for (const chunk of chunks) {
+          const q = query(collection(db, 'products'), where('__name__', 'in', chunk));
+          const snap = await getDocs(q);
+          fetched = [...fetched, ...snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))];
+        }
+        setWishlistProducts(fetched);
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      } finally {
+        setLoadingWishlist(false);
+      }
+    };
+    
+    if (activeTab === 'wishlist') {
+      fetchWishlist();
+    }
+  }, [profile?.wishlist, activeTab]);
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (!profile?.wishlist || profile.wishlist.length === 0) {
+        setWishlistProducts([]);
+        return;
+      }
+      setLoadingWishlist(true);
+      try {
+        // Firestore 'in' query supports up to 10 items. For a real app, we might need to chunk this.
+        // For MVP, we'll fetch all products and filter, or chunk if needed. Let's just fetch all and filter for simplicity if wishlist is large, or use chunking.
+        // Actually, fetching all products is bad. Let's chunk the wishlist array.
+        const chunks = [];
+        for (let i = 0; i < profile.wishlist.length; i += 10) {
+          chunks.push(profile.wishlist.slice(i, i + 10));
+        }
+        
+        let fetched: any[] = [];
+        for (const chunk of chunks) {
+          const q = query(collection(db, 'products'), where('__name__', 'in', chunk));
+          const snap = await getDocs(q);
+          fetched = [...fetched, ...snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))];
+        }
+        setWishlistProducts(fetched);
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      } finally {
+        setLoadingWishlist(false);
+      }
+    };
+    
+    if (activeTab === 'wishlist') {
+      fetchWishlist();
+    }
+  }, [profile?.wishlist, activeTab]);
 
   const handleUpgradeToSeller = async () => {
     if (!user || !profile) return;
@@ -267,47 +342,94 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* My Orders */}
+        {/* Right Side Content */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden h-full flex flex-col">
-            <div className="p-6 border-b border-gray-100 flex items-center gap-3">
-              <div className="h-10 w-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                <Package className="h-5 w-5 text-emerald-700" />
-              </div>
-              <h2 className="text-xl font-bold text-gray-900">My Orders</h2>
+            <div className="border-b border-gray-100 flex items-center">
+              <button 
+                onClick={() => setActiveTab('orders')}
+                className={`flex-1 py-4 text-center font-bold text-sm transition-colors ${activeTab === 'orders' ? 'text-emerald-700 border-b-2 border-emerald-700' : 'text-gray-500 hover:text-gray-900'}`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Package className="h-4 w-4" /> My Orders
+                </div>
+              </button>
+              <button 
+                onClick={() => setActiveTab('wishlist')}
+                className={`flex-1 py-4 text-center font-bold text-sm transition-colors ${activeTab === 'wishlist' ? 'text-emerald-700 border-b-2 border-emerald-700' : 'text-gray-500 hover:text-gray-900'}`}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Heart className="h-4 w-4" /> Wishlist
+                </div>
+              </button>
             </div>
             
             <div className="flex-1 p-6">
-              {loadingOrders ? (
-                <div className="flex items-center justify-center h-40 text-gray-500">Loading orders...</div>
-              ) : orders.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-40 text-gray-500">
-                  <Package className="h-12 w-12 text-gray-300 mb-2" />
-                  <p>You haven't placed any orders yet.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {orders.map(order => (
-                    <div key={order.id} className="border border-gray-100 rounded-2xl p-4 hover:border-emerald-100 transition-colors bg-gray-50/50">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Order #{order.id.slice(0, 8)}</p>
-                          <p className="text-sm text-gray-900 font-medium">{new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                        </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                          order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                          order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                          'bg-yellow-100 text-yellow-700'
-                        }`}>
-                          {order.status}
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between items-end">
-                        <div className="flex-1">
-                          <p className="text-sm font-bold text-gray-900 mb-1">Items:</p>
-                          <p className="text-sm text-gray-600 line-clamp-1">
-                            {order.items.map((i: any) => i.name || 'Unknown Item').join(', ')}
+              {activeTab === 'orders' && (
+                <>
+                  {loadingOrders ? (
+                    <div className="flex items-center justify-center h-40 text-gray-500">Loading orders...</div>
+                  ) : orders.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-40 text-gray-500">
+                      <Package className="h-12 w-12 text-gray-300 mb-2" />
+                      <p>You haven't placed any orders yet.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {orders.map(order => (
+                        <div key={order.id} className="border border-gray-100 rounded-2xl p-4 hover:border-emerald-100 transition-colors bg-gray-50/50">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Order #{order.id.slice(0, 8)}</p>
+                              <p className="text-sm text-gray-900 font-medium">{new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                              order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                              order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {order.status}
+                            </span>
+                          </div>
+                          
+                          {/* Order Timeline (Feature 2) */}
+                          <div className="mb-4 py-4 border-y border-gray-100">
+                            <div className="flex items-center justify-between relative">
+                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full z-0"></div>
+                              <div 
+                                className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-emerald-600 rounded-full z-0 transition-all duration-500"
+                                style={{ 
+                                  width: order.status === 'pending' ? '0%' : 
+                                         order.status === 'processing' ? '33%' : 
+                                         order.status === 'shipped' ? '66%' : 
+                                         order.status === 'delivered' ? '100%' : '0%' 
+                                }}
+                              ></div>
+                              
+                              {['pending', 'processing', 'shipped', 'delivered'].map((step, index) => {
+                                const isCompleted = 
+                                  order.status === 'delivered' || 
+                                  (order.status === 'shipped' && index <= 2) || 
+                                  (order.status === 'processing' && index <= 1) || 
+                                  (order.status === 'pending' && index === 0);
+                                
+                                return (
+                                  <div key={step} className="relative z-10 flex flex-col items-center">
+                                    <div className={`h-4 w-4 rounded-full border-2 ${isCompleted ? 'bg-emerald-600 border-emerald-600' : 'bg-white border-gray-300'}`}></div>
+                                    <span className={`absolute top-6 text-[10px] font-bold uppercase tracking-wider ${isCompleted ? 'text-emerald-700' : 'text-gray-400'}`}>
+                                      {step}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-end mt-8">
+                            <div className="flex-1">
+                              <p className="text-sm font-bold text-gray-900 mb-1">Items:</p>
+                              <p className="text-sm text-gray-600 line-clamp-1">
+                                {order.items.map((i: any) => i.name || 'Unknown Item').join(', ')}
                           </p>
                         </div>
                         <div className="text-right ml-4">
@@ -327,6 +449,50 @@ export default function Profile() {
                     </div>
                   ))}
                 </div>
+              )}
+              </>
+              )}
+
+              {activeTab === 'wishlist' && (
+                <>
+                  {loadingWishlist ? (
+                    <div className="flex items-center justify-center h-40 text-gray-500">Loading wishlist...</div>
+                  ) : wishlistProducts.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-40 text-gray-500">
+                      <Heart className="h-12 w-12 text-gray-300 mb-2" />
+                      <p>Your wishlist is empty.</p>
+                      <Link to="/explore" className="mt-4 text-emerald-700 font-bold hover:underline">
+                        Explore Products
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {wishlistProducts.map(product => (
+                        <div key={product.id} className="border border-gray-100 rounded-2xl p-3 flex gap-4 hover:border-emerald-100 transition-colors bg-white">
+                          <Link to={`/product/${product.id}`} className="shrink-0">
+                            <img 
+                              src={product.images?.[0] || product.image || "https://picsum.photos/seed/placeholder/200/200"} 
+                              alt={product.name}
+                              className="h-20 w-20 object-cover rounded-xl bg-gray-50"
+                              referrerPolicy="no-referrer"
+                            />
+                          </Link>
+                          <div className="flex-1 flex flex-col justify-between">
+                            <div>
+                              <Link to={`/product/${product.id}`}>
+                                <h3 className="text-sm font-bold text-gray-900 hover:text-emerald-700 line-clamp-1">{product.name}</h3>
+                              </Link>
+                              <p className="text-xs text-gray-500 mt-1">{product.category}</p>
+                            </div>
+                            <div className="flex items-center justify-between mt-2">
+                              <p className="text-sm font-black text-emerald-700">{product.price} ETB</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

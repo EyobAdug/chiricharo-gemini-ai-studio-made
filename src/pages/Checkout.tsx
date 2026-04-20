@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,41 @@ import { db } from '../firebase';
 import { CreditCard, MapPin, CheckCircle2, Truck } from 'lucide-react';
 import { motion } from 'motion/react';
 import { DELIVERY_OPTIONS, FREE_DELIVERY_THRESHOLD } from '../constants';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix Leaflet's default icon path issues with Webpack/Vite
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+function LocationMarker({ setAddress }: { setAddress: (addr: string) => void }) {
+  const [position, setPosition] = useState<L.LatLng | null>(null);
+  
+  const map = useMapEvents({
+    click(e) {
+      setPosition(e.latlng);
+      setAddress(`Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`);
+      map.flyTo(e.latlng, map.getZoom());
+    },
+    locationfound(e) {
+      setPosition(e.latlng);
+      map.flyTo(e.latlng, map.getZoom());
+    },
+  });
+
+  useEffect(() => {
+    map.locate();
+  }, [map]);
+
+  return position === null ? null : (
+    <Marker position={position}></Marker>
+  );
+}
 
 export default function Checkout() {
   const { cart, cartTotal, clearCart } = useCart();
@@ -199,13 +234,22 @@ export default function Checkout() {
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
               <MapPin className="h-5 w-5 text-emerald-700" /> {t('checkout.shipping')}
             </h2>
+            <div className="h-64 w-full rounded-xl overflow-hidden border border-gray-200 mb-4 z-0 relative">
+              <MapContainer center={[9.005401, 38.763611]} zoom={13} scrollWheelZoom={false} className="h-full w-full">
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <LocationMarker setAddress={setAddress} />
+              </MapContainer>
+            </div>
             <textarea
               required
               rows={3}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
-              placeholder="Enter your full delivery address in Ethiopia..."
+              placeholder="Enter your full delivery address in Ethiopia or click on the map..."
             />
           </div>
 

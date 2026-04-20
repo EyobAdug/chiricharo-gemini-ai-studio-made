@@ -25,6 +25,7 @@ export default function ProductDetails() {
   const [hasPurchased, setHasPurchased] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
+  const [reviewPhoto, setReviewPhoto] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
 
   const [isFavorite, setIsFavorite] = useState(false);
@@ -60,15 +61,6 @@ export default function ProductDetails() {
             }
           });
           setHasPurchased(purchased);
-
-          // Check if favorited
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            if (userData.favorites && userData.favorites.includes(id)) {
-              setIsFavorite(true);
-            }
-          }
         }
 
       } catch (error) {
@@ -80,28 +72,15 @@ export default function ProductDetails() {
     fetchProductAndReviews();
   }, [id, user]);
 
+  const { toggleWishlist } = useAuth();
+  const isWishlisted = profile?.wishlist?.includes(id || '');
+
   const handleFavorite = async () => {
-    if (!user) {
+    if (!user || !id) {
       navigate('/login');
       return;
     }
-    try {
-      const userRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        let newFavorites = userData.favorites || [];
-        if (isFavorite) {
-          newFavorites = newFavorites.filter((favId: string) => favId !== id);
-        } else {
-          newFavorites.push(id);
-        }
-        await updateDoc(userRef, { favorites: newFavorites });
-        setIsFavorite(!isFavorite);
-      }
-    } catch (error) {
-      console.error("Error updating favorites:", error);
-    }
+    await toggleWishlist(id);
   };
 
   const handleShare = async () => {
@@ -145,6 +124,7 @@ export default function ProductDetails() {
         userName: profile.name || 'User',
         rating: reviewRating,
         text: reviewText,
+        photo: reviewPhoto,
         createdAt: new Date().toISOString()
       };
       
@@ -172,6 +152,7 @@ export default function ProductDetails() {
       }));
       
       setReviewText('');
+      setReviewPhoto('');
       setReviewRating(5);
     } catch (error) {
       console.error("Error submitting review:", error);
@@ -248,9 +229,9 @@ export default function ProductDetails() {
               <div className="flex gap-2">
                 <button 
                   onClick={handleFavorite}
-                  className={cn("p-2 rounded-full border transition-colors", isFavorite ? "border-red-200 bg-red-50" : "border-gray-200 hover:bg-gray-50")}
+                  className={cn("p-2 rounded-full border transition-colors", isWishlisted ? "border-red-200 bg-red-50" : "border-gray-200 hover:bg-gray-50")}
                 >
-                  <Heart className={cn("h-5 w-5", isFavorite ? "text-red-500 fill-current" : "text-gray-400")} />
+                  <Heart className={cn("h-5 w-5", isWishlisted ? "text-red-500 fill-current" : "text-gray-400")} />
                 </button>
                 <button 
                   onClick={handleShare}
@@ -423,6 +404,17 @@ export default function ProductDetails() {
                     />
                   </div>
                   
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Photo URL (Optional)</label>
+                    <input
+                      type="url"
+                      value={reviewPhoto}
+                      onChange={(e) => setReviewPhoto(e.target.value)}
+                      className="w-full rounded-xl border border-gray-200 bg-white py-3 px-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
+                      placeholder="https://example.com/photo.jpg"
+                    />
+                  </div>
+                  
                   <button 
                     type="submit"
                     disabled={submittingReview}
@@ -470,6 +462,11 @@ export default function ProductDetails() {
                     </div>
                   </div>
                   <p className="text-gray-600 text-sm leading-relaxed">{review.text}</p>
+                  {review.photo && (
+                    <div className="mt-4">
+                      <img src={review.photo} alt="Review" className="max-h-48 rounded-xl object-cover border border-gray-100" referrerPolicy="no-referrer" />
+                    </div>
+                  )}
                 </motion.div>
               ))
             )}
