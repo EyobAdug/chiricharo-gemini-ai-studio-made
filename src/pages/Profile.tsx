@@ -4,7 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { doc, updateDoc, collection, query, where, getDocs, setDoc, deleteDoc, addDoc } from 'firebase/firestore';
 import { db, auth } from '../firebase';
-import { User, Mail, Shield, MapPin, Phone, CheckCircle, Package, X, Trash2, Heart } from 'lucide-react';
+import { User, Mail, Shield, MapPin, Phone, CheckCircle2, Package, X, Trash2, Heart, ArrowRight, ShieldCheck, Zap, Globe, PackageCheck, Clock } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '@/src/lib/utils';
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useAuth();
@@ -64,44 +66,6 @@ export default function Profile() {
       }
       setLoadingWishlist(true);
       try {
-        // Firestore 'in' query supports up to 10 items. For a real app, we might need to chunk this.
-        // For MVP, we'll fetch all products and filter, or chunk if needed. Let's just fetch all and filter for simplicity if wishlist is large, or use chunking.
-        // Actually, fetching all products is bad. Let's chunk the wishlist array.
-        const chunks = [];
-        for (let i = 0; i < profile.wishlist.length; i += 10) {
-          chunks.push(profile.wishlist.slice(i, i + 10));
-        }
-        
-        let fetched: any[] = [];
-        for (const chunk of chunks) {
-          const q = query(collection(db, 'products'), where('__name__', 'in', chunk));
-          const snap = await getDocs(q);
-          fetched = [...fetched, ...snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))];
-        }
-        setWishlistProducts(fetched);
-      } catch (error) {
-        console.error("Error fetching wishlist:", error);
-      } finally {
-        setLoadingWishlist(false);
-      }
-    };
-    
-    if (activeTab === 'wishlist') {
-      fetchWishlist();
-    }
-  }, [profile?.wishlist, activeTab]);
-
-  useEffect(() => {
-    const fetchWishlist = async () => {
-      if (!profile?.wishlist || profile.wishlist.length === 0) {
-        setWishlistProducts([]);
-        return;
-      }
-      setLoadingWishlist(true);
-      try {
-        // Firestore 'in' query supports up to 10 items. For a real app, we might need to chunk this.
-        // For MVP, we'll fetch all products and filter, or chunk if needed. Let's just fetch all and filter for simplicity if wishlist is large, or use chunking.
-        // Actually, fetching all products is bad. Let's chunk the wishlist array.
         const chunks = [];
         for (let i = 0; i < profile.wishlist.length; i += 10) {
           chunks.push(profile.wishlist.slice(i, i + 10));
@@ -180,7 +144,6 @@ export default function Profile() {
     if (!user || !profile || !deleteReason) return;
     setDeleting(true);
     try {
-      // 1. If seller, delete all their products
       if (profile.role === 'seller') {
         const pQuery = query(collection(db, 'products'), where('sellerId', '==', user.uid));
         const pSnapshot = await getDocs(pQuery);
@@ -189,7 +152,6 @@ export default function Profile() {
         }
       }
 
-      // 2. Move to deleted_users
       await setDoc(doc(db, 'deleted_users', user.uid), {
         ...profile,
         status: 'deleted',
@@ -198,7 +160,6 @@ export default function Profile() {
         deletedBy: 'self'
       });
 
-      // 3. Notify admins
       const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
       const adminSnap = await getDocs(adminQuery);
       for (const adminDoc of adminSnap.docs) {
@@ -212,10 +173,7 @@ export default function Profile() {
         });
       }
 
-      // 4. Delete user profile
       await deleteDoc(doc(db, 'users', user.uid));
-
-      // 5. Sign out
       await auth.signOut();
     } catch (error) {
       console.error("Error deleting account:", error);
@@ -227,389 +185,424 @@ export default function Profile() {
   if (!profile) return null;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="bg-brand-light min-h-screen">
+      <div className="mx-auto max-w-[1400px] px-4 py-12 md:py-24">
         
-        {/* Profile Info */}
-        <div className="lg:col-span-1 space-y-8">
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-            <div className="bg-emerald-700 px-6 py-8 text-white flex flex-col items-center text-center">
-              <div className="h-24 w-24 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm mb-4">
-                <User className="h-12 w-12 text-white" />
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+              <div className="flex items-center gap-2 text-brand-orange font-black text-[10px] uppercase tracking-[0.2em] mb-4 italic">
+                 <ShieldCheck className="h-3 w-3" /> Command Center 01
               </div>
-              <h1 className="text-2xl font-extrabold">{t('profile.title') || 'Manage Account'}</h1>
-              <p className="text-emerald-100 mt-1 flex items-center gap-2 text-sm">
-                <Mail className="h-4 w-4" /> {user?.email}
-              </p>
-            </div>
-
-            <form onSubmit={handleSave} className="p-6 space-y-6">
-              {successMsg && (
-                <div className="bg-green-50 text-green-700 p-4 rounded-xl flex items-center gap-2 font-medium text-sm">
-                  <CheckCircle className="h-5 w-5" /> {successMsg}
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-1">{t('auth.name') || 'Full Name'}</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input 
-                    type="text" 
-                    value={name} 
-                    onChange={e => setName(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-1">Role</label>
-                <div className="relative flex items-center gap-4">
-                  <div className="relative flex-1">
-                    <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <input 
-                      type="text" 
-                      value={profile.role.toUpperCase()} 
-                      disabled
-                      className="w-full rounded-xl border border-gray-200 bg-gray-100 py-3 pl-10 pr-4 text-sm text-gray-500 cursor-not-allowed font-bold"
-                    />
-                  </div>
-                  {profile.role === 'buyer' && (
-                    <button 
-                      type="button"
-                      onClick={handleUpgradeToSeller}
-                      disabled={saving}
-                      className="shrink-0 text-sm font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-4 py-3 rounded-xl border border-emerald-100 transition-colors disabled:opacity-50"
-                    >
-                      Become a Seller
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {profile.role === 'seller' && (
-                <>
-                  <hr className="border-gray-100" />
-                  <h3 className="text-lg font-bold text-gray-900">Seller Information</h3>
-                  
-                  <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-1">{t('seller.info.address') || 'Business Address'}</label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <input 
-                        type="text" 
-                        value={address} 
-                        onChange={e => setAddress(e.target.value)}
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-gray-900 mb-1">{t('seller.info.phone') || 'Phone Number'}</label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <input 
-                        type="text" 
-                        value={phone} 
-                        onChange={e => setPhone(e.target.value)}
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-
-              <div className="pt-2 flex flex-col gap-4">
-                <button 
-                  type="submit" 
-                  disabled={saving}
-                  className="w-full rounded-full bg-emerald-700 px-8 py-3 text-sm font-bold text-white hover:bg-emerald-800 transition-all disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : (t('profile.save') || 'Save Changes')}
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => setIsDeleteModalOpen(true)}
-                  className="w-full rounded-full border border-red-200 bg-red-50 py-3 text-sm font-bold text-red-600 hover:bg-red-100 transition-all flex items-center justify-center gap-2"
-                >
-                  <Trash2 className="h-4 w-4" /> Delete Account
-                </button>
-              </div>
-            </form>
-          </div>
+              <h1 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter italic">
+                STRATEGIC PROFILE
+              </h1>
+           </motion.div>
+           <Link to="/" className="text-[10px] font-black uppercase text-gray-400 hover:text-brand-orange transition-colors flex items-center gap-2 tracking-[0.2em]">
+              Return to Sector Alpha <ArrowRight className="h-3 w-3" />
+           </Link>
         </div>
 
-        {/* Right Side Content */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden h-full flex flex-col">
-            <div className="border-b border-gray-100 flex items-center">
-              <button 
-                onClick={() => setActiveTab('orders')}
-                className={`flex-1 py-4 text-center font-bold text-sm transition-colors ${activeTab === 'orders' ? 'text-emerald-700 border-b-2 border-emerald-700' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Package className="h-4 w-4" /> My Orders
-                </div>
-              </button>
-              <button 
-                onClick={() => setActiveTab('wishlist')}
-                className={`flex-1 py-4 text-center font-bold text-sm transition-colors ${activeTab === 'wishlist' ? 'text-emerald-700 border-b-2 border-emerald-700' : 'text-gray-500 hover:text-gray-900'}`}
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <Heart className="h-4 w-4" /> Wishlist
-                </div>
-              </button>
-            </div>
-            
-            <div className="flex-1 p-6">
-              {activeTab === 'orders' && (
-                <>
-                  {loadingOrders ? (
-                    <div className="flex items-center justify-center h-40 text-gray-500">Loading orders...</div>
-                  ) : orders.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-40 text-gray-500">
-                      <Package className="h-12 w-12 text-gray-300 mb-2" />
-                      <p>You haven't placed any orders yet.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {orders.map(order => (
-                        <div key={order.id} className="border border-gray-100 rounded-2xl p-4 hover:border-emerald-100 transition-colors bg-gray-50/50">
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Order #{order.id.slice(0, 8)}</p>
-                              <p className="text-sm text-gray-900 font-medium">{new Date(order.createdAt).toLocaleDateString()} at {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                            </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                              order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                              order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                              'bg-yellow-100 text-yellow-700'
-                            }`}>
-                              {order.status}
-                            </span>
-                          </div>
-                          
-                          {/* Order Timeline (Feature 2) */}
-                          <div className="mb-4 py-4 border-y border-gray-100">
-                            <div className="flex items-center justify-between relative">
-                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full z-0"></div>
-                              <div 
-                                className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-emerald-600 rounded-full z-0 transition-all duration-500"
-                                style={{ 
-                                  width: order.status === 'pending' ? '0%' : 
-                                         order.status === 'processing' ? '33%' : 
-                                         order.status === 'shipped' ? '66%' : 
-                                         order.status === 'delivered' ? '100%' : '0%' 
-                                }}
-                              ></div>
-                              
-                              {['pending', 'processing', 'shipped', 'delivered'].map((step, index) => {
-                                const isCompleted = 
-                                  order.status === 'delivered' || 
-                                  (order.status === 'shipped' && index <= 2) || 
-                                  (order.status === 'processing' && index <= 1) || 
-                                  (order.status === 'pending' && index === 0);
-                                
-                                return (
-                                  <div key={step} className="relative z-10 flex flex-col items-center">
-                                    <div className={`h-4 w-4 rounded-full border-2 ${isCompleted ? 'bg-emerald-600 border-emerald-600' : 'bg-white border-gray-300'}`}></div>
-                                    <span className={`absolute top-6 text-[10px] font-bold uppercase tracking-wider ${isCompleted ? 'text-emerald-700' : 'text-gray-400'}`}>
-                                      {step}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+          
+          {/* Identity Hub - Column 1 */}
+          <div className="lg:col-span-4 space-y-12">
+            <div className="bg-brand-dark rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+               
+               <div className="flex items-center gap-6 mb-12">
+                  <div className="h-20 w-20 rounded-[1.5rem] bg-white/10 flex items-center justify-center relative overflow-hidden">
+                     <div className="absolute inset-0 bg-gradient-to-tr from-brand-orange to-transparent opacity-20"></div>
+                     <User className="h-10 w-10 text-white" />
+                  </div>
+                  <div>
+                     <h2 className="text-2xl font-black italic tracking-tight">{profile.name}</h2>
+                     <p className="text-brand-orange text-[10px] font-bold uppercase tracking-[0.2em] mt-1">{profile.role === 'admin' ? 'Strategic Admin' : profile.role.toUpperCase()}</p>
+                  </div>
+               </div>
 
-                          <div className="flex justify-between items-end mt-8">
-                            <div className="flex-1">
-                              <p className="text-sm font-bold text-gray-900 mb-1">Items:</p>
-                              <p className="text-sm text-gray-600 line-clamp-1">
-                                {order.items.map((i: any) => i.name || 'Unknown Item').join(', ')}
-                          </p>
-                        </div>
-                        <div className="text-right ml-4">
-                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Total</p>
-                          <p className="text-lg font-black text-emerald-700">{order.totalAmount.toFixed(2)} ETB</p>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end">
-                        <button 
-                          onClick={() => setSelectedOrder(order)}
-                          className="text-sm font-bold text-emerald-700 hover:text-emerald-800"
-                        >
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              </>
-              )}
+               <div className="space-y-6 mb-12 italic">
+                  <div className="flex items-center gap-4 text-white/50 text-sm font-medium">
+                     <Mail className="h-4 w-4 text-brand-orange" />
+                     {user?.email}
+                  </div>
+                  <div className="flex items-center gap-4 text-white/50 text-sm font-medium">
+                     <Globe className="h-4 w-4 text-brand-orange" />
+                     Region: Ethiopia Sector
+                  </div>
+               </div>
 
-              {activeTab === 'wishlist' && (
-                <>
-                  {loadingWishlist ? (
-                    <div className="flex items-center justify-center h-40 text-gray-500">Loading wishlist...</div>
-                  ) : wishlistProducts.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-40 text-gray-500">
-                      <Heart className="h-12 w-12 text-gray-300 mb-2" />
-                      <p>Your wishlist is empty.</p>
-                      <Link to="/explore" className="mt-4 text-emerald-700 font-bold hover:underline">
-                        Explore Products
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {wishlistProducts.map(product => (
-                        <div key={product.id} className="border border-gray-100 rounded-2xl p-3 flex gap-4 hover:border-emerald-100 transition-colors bg-white">
-                          <Link to={`/product/${product.id}`} className="shrink-0">
-                            <img 
-                              src={product.images?.[0] || product.image || "https://picsum.photos/seed/placeholder/200/200"} 
-                              alt={product.name}
-                              className="h-20 w-20 object-cover rounded-xl bg-gray-50"
-                              referrerPolicy="no-referrer"
-                            />
-                          </Link>
-                          <div className="flex-1 flex flex-col justify-between">
-                            <div>
-                              <Link to={`/product/${product.id}`}>
-                                <h3 className="text-sm font-bold text-gray-900 hover:text-emerald-700 line-clamp-1">{product.name}</h3>
-                              </Link>
-                              <p className="text-xs text-gray-500 mt-1">{product.category}</p>
-                            </div>
-                            <div className="flex items-center justify-between mt-2">
-                              <p className="text-sm font-black text-emerald-700">{product.price} ETB</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+               <form onSubmit={handleSave} className="space-y-6">
+                  {successMsg && (
+                    <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-2xl flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest border border-emerald-500/20">
+                      <CheckCircle2 className="h-4 w-4" /> {successMsg}
                     </div>
                   )}
-                </>
-              )}
+
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black uppercase text-white/30 tracking-widest ml-1">Identity Vector</label>
+                    <input 
+                      type="text" 
+                      value={name} 
+                      onChange={e => setName(e.target.value)}
+                      className="w-full rounded-2xl border border-white/5 bg-white/5 py-4 px-6 text-sm font-bold text-white focus:bg-white/10 focus:outline-none transition-all outline-none italic"
+                      required
+                    />
+                  </div>
+
+                  {profile.role === 'seller' && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-white/30 tracking-widest ml-1">Logistics Coordinate</label>
+                        <input 
+                          type="text" 
+                          value={address} 
+                          onChange={e => setAddress(e.target.value)}
+                          className="w-full rounded-2xl border border-white/5 bg-white/5 py-4 px-6 text-sm font-bold text-white focus:bg-white/10 focus:outline-none transition-all outline-none italic"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-white/30 tracking-widest ml-1">Communication Line</label>
+                        <input 
+                          type="text" 
+                          value={phone} 
+                          onChange={e => setPhone(e.target.value)}
+                          className="w-full rounded-2xl border border-white/5 bg-white/5 py-4 px-6 text-sm font-bold text-white focus:bg-white/10 focus:outline-none transition-all outline-none italic"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="pt-4 flex flex-col gap-4">
+                    <button 
+                      type="submit" 
+                      disabled={saving}
+                      className="w-full h-16 bg-brand-orange text-white rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-brand-orange/30 hover:bg-brand-orange-hover hover:-translate-y-1 transition-all disabled:opacity-50 italic"
+                    >
+                      {saving ? 'SYNCING...' : 'Update Protocol'}
+                    </button>
+                    {profile.role === 'buyer' && (
+                        <button 
+                          type="button"
+                          onClick={handleUpgradeToSeller}
+                          disabled={saving}
+                          className="w-full h-16 border border-white/10 text-white rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-xs hover:bg-white/5 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                          Establish Merchant Hub <Zap className="h-4 w-4 text-brand-orange" />
+                        </button>
+                    )}
+                  </div>
+               </form>
+            </div>
+
+            <div className="px-10">
+               <button 
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  className="text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-500 transition-colors flex items-center gap-3 italic"
+               >
+                  <Trash2 className="h-4 w-4" /> Decommission Account
+               </button>
+            </div>
+          </div>
+
+          {/* Activity Logs - Column 2 */}
+          <div className="lg:col-span-8 space-y-12">
+            <div className="bg-white rounded-[3.5rem] p-4 md:p-10 border border-gray-100 shadow-sm min-h-[600px] flex flex-col">
+               
+               <div className="flex border-b border-gray-100 mb-10 overflow-x-auto no-scrollbar">
+                  <button 
+                    onClick={() => setActiveTab('orders')}
+                    className={cn(
+                        "px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative shrink-0",
+                        activeTab === 'orders' ? "text-brand-orange italic" : "text-gray-300 hover:text-gray-500"
+                    )}
+                  >
+                    DEPLOYMENT HISTORY
+                    {activeTab === 'orders' && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-1 bg-brand-orange rounded-full" />}
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('wishlist')}
+                    className={cn(
+                        "px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative shrink-0",
+                        activeTab === 'wishlist' ? "text-brand-orange italic" : "text-gray-300 hover:text-gray-500"
+                    )}
+                  >
+                    ASSET WATCHLIST
+                    {activeTab === 'wishlist' && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-1 bg-brand-orange rounded-full" />}
+                  </button>
+               </div>
+
+               <div className="flex-1">
+                  <AnimatePresence mode="wait">
+                    {activeTab === 'orders' ? (
+                      <motion.div 
+                        key="orders"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-6"
+                      >
+                        {loadingOrders ? (
+                          <div className="flex items-center justify-center h-64 text-gray-400 font-black italic uppercase text-xs tracking-widest animate-pulse">Syncing orders...</div>
+                        ) : orders.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-64 text-gray-400 text-center">
+                            <Package className="h-16 w-16 text-gray-100 mb-6" />
+                            <p className="text-xs font-black uppercase tracking-widest italic leading-relaxed">No strategic deployments detected in current cycle.</p>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 gap-6">
+                             {orders.map(order => (
+                                <div key={order.id} className="group relative bg-brand-light p-8 rounded-[2rem] border border-transparent hover:border-brand-orange/20 transition-all hover:bg-white hover:shadow-premium overflow-hidden">
+                                   <div className="absolute top-0 right-0 w-24 h-24 bg-brand-orange/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform"></div>
+                                   
+                                   <div className="flex flex-wrap justify-between items-start gap-4 mb-8">
+                                      <div>
+                                         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 italic">Operation ID: <span className="text-brand-orange">#{order.id.slice(-8).toUpperCase()}</span></p>
+                                         <p className="text-[10px] text-gray-900 font-black italic">{new Date(order.createdAt).toLocaleDateString()} // {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                      </div>
+                                      <div className={cn(
+                                          "px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest italic border",
+                                          order.status === 'delivered' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                                          order.status === 'cancelled' ? "bg-red-50 text-red-600 border-red-100" :
+                                          "bg-brand-orange/10 text-brand-orange border-brand-orange/20"
+                                      )}>
+                                         {order.status}
+                                      </div>
+                                   </div>
+
+                                   {/* Timeline Component */}
+                                   <div className="mb-10 px-4">
+                                      <div className="flex items-center justify-between relative pt-6">
+                                         <div className="absolute left-0 top-1/2 w-full h-[2px] bg-gray-200 z-0"></div>
+                                         <div 
+                                           className="absolute left-0 top-1/2 h-[2px] bg-brand-orange z-0 transition-all duration-700" 
+                                           style={{ 
+                                             width: order.status === 'pending' ? '0%' : 
+                                                    order.status === 'processing' ? '33.3%' : 
+                                                    order.status === 'shipped' ? '66.6%' : 
+                                                    order.status === 'delivered' ? '100%' : '0%' 
+                                           }}
+                                         ></div>
+                                         
+                                         {['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED'].map((step, idx) => {
+                                           const isDone = 
+                                             order.status === 'delivered' || 
+                                             (order.status === 'shipped' && idx <= 2) || 
+                                             (order.status === 'processing' && idx <= 1) || 
+                                             (idx === 0);
+                                           
+                                           return (
+                                             <div key={idx} className="relative z-10 flex flex-col items-center">
+                                                <div className={cn(
+                                                    "h-3 w-3 rounded-full transition-all duration-500",
+                                                    isDone ? "bg-brand-orange scale-125 shadow-lg shadow-brand-orange/30" : "bg-white border-2 border-gray-200"
+                                                )}></div>
+                                                <span className={cn(
+                                                    "absolute -bottom-6 text-[8px] font-black uppercase tracking-widest whitespace-nowrap italic",
+                                                    isDone ? "text-brand-orange" : "text-gray-300"
+                                                )}>{step}</span>
+                                             </div>
+                                           );
+                                         })}
+                                      </div>
+                                   </div>
+
+                                   <div className="flex flex-wrap items-end justify-between gap-6 pt-6 border-t border-gray-100/50 mt-10">
+                                      <div className="flex-1 max-w-sm">
+                                         <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2 italic">Strategic Assets</p>
+                                         <p className="text-[10px] font-bold text-gray-900 line-clamp-1 italic">{order.items.map((i: any) => i.name).join(' // ')}</p>
+                                      </div>
+                                      <div className="flex items-center gap-6">
+                                         <div className="text-right">
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1 italic">Settlement</p>
+                                            <p className="text-xl font-black text-brand-orange italic">{order.totalAmount.toLocaleString()} <span className="text-[10px] tracking-tight">ETB</span></p>
+                                         </div>
+                                         <button 
+                                           onClick={() => setSelectedOrder(order)}
+                                           className="h-12 w-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center hover:bg-brand-orange hover:text-white hover:scale-110 transition-all shadow-sm"
+                                         >
+                                            <ArrowRight className="h-4 w-4" />
+                                         </button>
+                                      </div>
+                                   </div>
+                                </div>
+                             ))}
+                          </div>
+                        )}
+                      </motion.div>
+                    ) : (
+                      <motion.div 
+                        key="wishlist"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                      >
+                        {loadingWishlist ? (
+                          <div className="flex items-center justify-center h-64 text-gray-400 font-black italic uppercase text-xs tracking-widest animate-pulse">Syncing assets...</div>
+                        ) : wishlistProducts.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-64 text-gray-400 text-center">
+                            <Heart className="h-16 w-16 text-gray-100 mb-6" />
+                            <p className="text-xs font-black uppercase tracking-widest italic leading-relaxed">No operational targets identified in watch list.</p>
+                            <Link to="/explore" className="mt-8 h-12 px-8 bg-brand-dark text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center hover:bg-brand-orange transition-colors">Target Sourcing Hub</Link>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            {wishlistProducts.map(product => (
+                              <Link 
+                                to={`/product/${product.id}`} 
+                                key={product.id} 
+                                className="group bg-brand-light p-4 rounded-[2rem] flex gap-6 hover:bg-white border border-transparent hover:border-brand-orange/20 transition-all hover:shadow-premium"
+                              >
+                                <div className="h-24 w-24 rounded-2xl overflow-hidden shrink-0">
+                                  <img 
+                                    src={product.images?.[0] || product.image || "https://picsum.photos/seed/placeholder/200/200"} 
+                                    className="h-full w-full object-cover transition-transform group-hover:scale-110" 
+                                    alt={product.name}
+                                    referrerPolicy="no-referrer"
+                                  />
+                                </div>
+                                <div className="flex flex-col justify-between py-2">
+                                  <div>
+                                     <p className="text-[8px] font-black text-brand-orange uppercase tracking-widest mb-1 italic">{product.category}</p>
+                                     <h3 className="text-lg font-black text-gray-900 tracking-tighter italic line-clamp-1 group-hover:text-brand-orange transition-colors">{product.name}</h3>
+                                  </div>
+                                  <p className="text-xl font-black text-gray-900 italic">{product.price.toLocaleString()} <span className="text-[10px] tracking-tight">ETB</span></p>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Order Details Modal */}
-      {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden">
-            <div className="flex justify-between items-center p-6 border-b border-gray-100">
-              <h3 className="text-xl font-bold text-gray-900">Order Details</h3>
-              <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600">
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
-              <div className="grid grid-cols-2 gap-4">
+      {/* Modern Order Details Modal */}
+      <AnimatePresence>
+        {selectedOrder && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedOrder(null)} className="absolute inset-0 bg-brand-dark/80 backdrop-blur-md" />
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+               animate={{ opacity: 1, scale: 1, y: 0 }} 
+               exit={{ opacity: 0, scale: 0.9, y: 20 }}
+               className="bg-white rounded-[3.5rem] shadow-2xl w-full max-w-2xl overflow-hidden relative"
+            >
+              <div className="flex justify-between items-center px-10 py-10 border-b border-gray-100">
                 <div>
-                  <p className="text-sm font-bold text-gray-500">Order ID</p>
-                  <p className="font-medium text-gray-900">{selectedOrder.id}</p>
+                   <h3 className="text-3xl font-black text-gray-900 tracking-tighter italic">OP_DETAILS</h3>
+                   <p className="text-[10px] font-black text-brand-orange tracking-widest uppercase italic mt-1 font-bold">Execution Report #{selectedOrder.id.slice(-8).toUpperCase()}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-500">Date</p>
-                  <p className="font-medium text-gray-900">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-500">Status</p>
-                  <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                    selectedOrder.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                    selectedOrder.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                    'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {selectedOrder.status}
-                  </span>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm font-bold text-gray-500">Delivery Address</p>
-                  <p className="font-medium text-gray-900 bg-gray-50 p-3 rounded-xl mt-1">{selectedOrder.shippingAddress}</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-gray-900 mb-3">Items</h4>
-                <div className="space-y-3">
-                  {selectedOrder.items.map((item: any, idx: number) => (
-                    <div key={idx} className="flex items-center gap-4 bg-gray-50 p-3 rounded-xl">
-                      {item.image && <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />}
-                      <div className="flex-1">
-                        <p className="font-bold text-gray-900">{item.name || 'Unknown Item'}</p>
-                        <p className="text-sm text-gray-500">Qty: {item.quantity} × {item.price} ETB</p>
-                      </div>
-                      <div className="font-bold text-gray-900">
-                        {(item.quantity * item.price).toFixed(2)} ETB
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                <p className="font-bold text-gray-500">Total Amount</p>
-                <p className="text-2xl font-black text-emerald-700">{selectedOrder.totalAmount.toFixed(2)} ETB</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Account Modal */}
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-red-600 flex items-center gap-2">
-                <Trash2 className="h-6 w-6" /> Delete Account
-              </h3>
-              <button onClick={() => setIsDeleteModalOpen(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <form onSubmit={handleDeleteAccount} className="p-6 space-y-4">
-              <p className="text-gray-600 text-sm">
-                Are you sure you want to delete your account? This action cannot be undone.
-                {profile.role === 'seller' && " All your products will also be permanently removed."}
-              </p>
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">Why are you leaving?</label>
-                <textarea
-                  required
-                  value={deleteReason}
-                  onChange={(e) => setDeleteReason(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-4 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
-                  rows={3}
-                  placeholder="Please tell us why you want to delete your account..."
-                />
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsDeleteModalOpen(false)}
-                  className="flex-1 rounded-xl border border-gray-200 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={deleting || !deleteReason}
-                  className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-bold text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-                >
-                  {deleting ? 'Deleting...' : 'Delete Account'}
+                <button onClick={() => setSelectedOrder(null)} className="h-12 w-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors">
+                  <X className="h-6 w-6" />
                 </button>
               </div>
-            </form>
+              <div className="p-10 space-y-12 max-h-[70vh] overflow-y-auto no-scrollbar">
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                   <div className="space-y-6 italic">
+                      <div>
+                         <p className="text-[9px] font-black uppercase text-gray-400 tracking-widest mb-1">Timestamp</p>
+                         <p className="text-sm font-bold text-gray-900">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                      </div>
+                      <div>
+                         <p className="text-[9px] font-black uppercase text-gray-400 tracking-widest mb-1">Authorization Status</p>
+                         <div className="inline-block px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-100">PLATFORM_VERIFIED</div>
+                      </div>
+                   </div>
+                   <div className="space-y-2">
+                       <p className="text-[9px] font-black uppercase text-gray-400 tracking-widest mb-1 italic">Logistics Destination</p>
+                       <div className="p-6 bg-brand-light rounded-[1.5rem] text-[11px] font-bold text-gray-900 leading-relaxed italic border border-gray-200/50">
+                          <MapPin className="h-3 w-3 text-brand-orange mb-2" />
+                          {selectedOrder.shippingAddress}
+                       </div>
+                   </div>
+                </div>
+
+                <div>
+                  <p className="text-[9px] font-black uppercase text-gray-400 tracking-widest mb-6 italic">Strategic Loadout</p>
+                  <div className="space-y-4">
+                    {selectedOrder.items.map((item: any, idx: number) => (
+                      <div key={idx} className="flex items-center gap-6 bg-brand-light/50 p-4 rounded-[1.5rem] border border-gray-100 hover:bg-white transition-colors group">
+                        {item.image && <img src={item.image} alt={item.name} className="w-16 h-16 rounded-xl object-cover shadow-sm group-hover:scale-110 transition-transform" />}
+                        <div className="flex-1">
+                          <p className="text-sm font-black text-gray-900 italic tracking-tight">{item.name}</p>
+                          <p className="text-[10px] text-gray-400 font-bold tracking-widest mt-1 italic">QTY: 0{item.quantity} // UNIT_RATE: {item.price.toLocaleString()} ETB</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-black text-brand-orange italic">{(item.quantity * item.price).toLocaleString()} <span className="text-[10px]">ETB</span></p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="flex flex-col items-end pt-10 border-t border-gray-100">
+                  <p className="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em] mb-2 italic">Total Settlement</p>
+                  <p className="text-5xl font-black text-gray-900 tracking-tighter italic">{selectedOrder.totalAmount.toLocaleString()} <span className="text-xl text-brand-orange uppercase not-italic">ETB</span></p>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
+
+      {/* Modern Delete Modal */}
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsDeleteModalOpen(false)} className="absolute inset-0 bg-brand-dark/80 backdrop-blur-sm" />
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.9 }} 
+               animate={{ opacity: 1, scale: 1 }} 
+               exit={{ opacity: 0, scale: 0.9 }}
+               className="bg-white rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden relative"
+            >
+              <div className="p-10 border-b border-gray-100 flex justify-between items-center">
+                <h3 className="text-2xl font-black text-red-500 italic tracking-tighter">DECOMMISSION</h3>
+                <button onClick={() => setIsDeleteModalOpen(false)} className="text-gray-400 hover:text-gray-900">
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              <form onSubmit={handleDeleteAccount} className="p-10 space-y-8">
+                <p className="text-sm text-gray-500 font-bold italic leading-relaxed">
+                  Initiating final decommission of identity vector. This action is irreversible. All associated merchant assets and data nodes will be purged.
+                </p>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-gray-400 tracking-widest pl-1 italic">Termination Log Reason</label>
+                  <textarea
+                    required
+                    value={deleteReason}
+                    onChange={(e) => setDeleteReason(e.target.value)}
+                    className="w-full rounded-2xl border-none bg-brand-light p-6 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-red-500/20 outline-none transition-all italic"
+                    rows={3}
+                    placeholder="Log termination reason for platform records..."
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteModalOpen(false)}
+                    className="flex-1 h-14 rounded-xl border border-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:bg-gray-50"
+                  >
+                    Abort
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={deleting || !deleteReason}
+                    className="flex-1 h-14 bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 shadow-xl shadow-red-500/20 transition-all disabled:opacity-50"
+                  >
+                    {deleting ? 'PURGING...' : 'Confirm'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

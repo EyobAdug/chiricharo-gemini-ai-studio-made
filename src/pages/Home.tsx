@@ -1,263 +1,336 @@
 import { motion } from 'motion/react';
-import { ArrowRight, Star, Shield, Zap, TrendingUp, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Star, Shield, Zap, TrendingUp, ShoppingBag, ShieldCheck, Search, Globe, Truck, Award } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '@/src/context/CartContext';
 import { useLanguage } from '@/src/context/LanguageContext';
 import { useAuth } from '@/src/context/AuthContext';
+import ProductCard from '@/src/components/ProductCard';
 import { cn } from '@/src/lib/utils';
 
 const FEATURED_PRODUCTS = [
   {
     id: 1,
-    name: "Premium Wireless Headphones",
-    price: 299.99,
+    name: "Premium Wireless Noise-Cancelling Headphones",
+    price: 15450,
     rating: 4.8,
     reviews: 124,
     image: "https://picsum.photos/seed/headphones/600/600",
-    category: "Electronics"
+    category: "Electronics",
+    sellerName: "Sony Official"
   },
   {
     id: 2,
-    name: "Minimalist Leather Backpack",
-    price: 145.00,
+    name: "Executive Minimalist Leather Portfolio Backpack",
+    price: 8900,
     rating: 4.9,
     reviews: 89,
     image: "https://picsum.photos/seed/backpack/600/600",
-    category: "Fashion"
+    category: "Fashion",
+    sellerName: "Ethio Leather"
   },
   {
     id: 3,
-    name: "Smart Home Security Camera",
-    price: 199.00,
+    name: "Ultra HD Smart Home Security System - 4K",
+    price: 24000,
     rating: 4.7,
     reviews: 215,
     image: "https://picsum.photos/seed/camera/600/600",
-    category: "Home Tech"
+    category: "Home Tech",
+    sellerName: "Security Pro"
   },
   {
     id: 4,
-    name: "Mechanical Gaming Keyboard",
-    price: 129.99,
+    name: "High-Performance Mechanical Gaming Keyboard",
+    price: 6200,
     rating: 4.6,
     reviews: 156,
     image: "https://picsum.photos/seed/keyboard/600/600",
-    category: "Gaming"
+    category: "Gaming",
+    sellerName: "TechHub"
   }
 ];
 
 import { CATEGORIES as CONST_CATEGORIES } from '@/src/constants';
 
 const CATEGORIES = [
-  { name: CONST_CATEGORIES[0].name, icon: Zap, color: "bg-emerald-50 text-emerald-600" },
-  { name: CONST_CATEGORIES[2].name, icon: TrendingUp, color: "bg-yellow-50 text-yellow-600" },
-  { name: CONST_CATEGORIES[4].name, icon: Star, color: "bg-red-50 text-red-600" },
-  { name: CONST_CATEGORIES[1].name, icon: Shield, color: "bg-emerald-50 text-emerald-600" },
+  { name: CONST_CATEGORIES[0].name, icon: Zap, color: "text-brand-orange", bg: "bg-brand-orange/5" },
+  { name: CONST_CATEGORIES[2].name, icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-50" },
+  { name: CONST_CATEGORIES[4].name, icon: Star, color: "text-purple-600", bg: "bg-purple-50" },
+  { name: CONST_CATEGORIES[1].name, icon: Shield, color: "text-brand-green", bg: "bg-brand-green/5" },
+];
+
+const TRUST_BADGES = [
+  { icon: ShieldCheck, title: "Trade Assurance", desc: "Protecting your orders from payment to delivery" },
+  { icon: Award, title: "Verified Suppliers", desc: "Work with manufacturers inspected by third parties" },
+  { icon: Truck, title: "Logistics Solutions", desc: "Reliable shipping options across Ethiopia" },
+  { icon: Globe, title: "Global Standards", desc: "A world-class marketplace feel in every transaction" }
 ];
 
 export default function Home() {
   const navigate = useNavigate();
-  const { addToCart } = useCart();
   const { t } = useLanguage();
   const { user } = useAuth();
 
-  const handleAddToCart = (product: any) => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    addToCart(product);
-  };
-
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: 'spring', stiffness: 100 }
-    }
+    visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } }
   };
 
   return (
-    <div className="flex flex-col gap-20 pb-20">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-stone-50 pt-16 lg:pt-24 pb-16">
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-5">
-          <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-600 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 right-0 w-96 h-96 bg-yellow-500 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-24 left-1/3 w-96 h-96 bg-red-600 rounded-full blur-3xl"></div>
+    <div className="flex flex-col gap-24 pb-24 bg-brand-light">
+      
+      {/* Hero Section - Luxury Enterprise Style */}
+      <section className="relative min-h-[85vh] flex items-center pt-8 md:pt-0 overflow-hidden bg-brand-dark">
+        {/* Abstract Background */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-brand-orange/20 to-transparent"></div>
+          <div className="absolute -bottom-48 -left-48 w-[600px] h-[600px] bg-brand-orange/10 rounded-full blur-[120px]"></div>
+          <img 
+             src="https://picsum.photos/seed/luxury-market/1600/900"
+             className="absolute inset-0 w-full h-full object-cover opacity-20 contrast-125 brightness-50"
+             alt="Luxury Hero"
+          />
         </div>
-        
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
+
+        <div className="mx-auto max-w-[1400px] w-full px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
             <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-2xl"
+               initial={{ opacity: 0, y: 30 }}
+               animate={{ opacity: 1, y: 0 }}
+               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             >
-              <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 sm:text-6xl mb-6 leading-tight">
-                {t('home.hero.title')}
-              </h1>
-              <p className="text-lg text-gray-600 mb-10 leading-relaxed font-medium">
-                {t('home.hero.subtitle')}
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link to="/explore" className="inline-flex items-center justify-center rounded-full bg-emerald-700 px-8 py-4 text-base font-bold text-white hover:bg-emerald-800 transition-all shadow-lg shadow-emerald-200 hover:-translate-y-1">
-                  {t('home.hero.cta')} <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-                {!user && (
-                  <Link to="/register?role=seller" className="inline-flex items-center justify-center rounded-full bg-white border-2 border-emerald-100 px-8 py-4 text-base font-bold text-emerald-800 hover:border-emerald-600 hover:text-emerald-700 transition-all hover:-translate-y-1 shadow-sm">
-                    Become a Seller
-                  </Link>
-                )}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-white/90 text-xs font-bold uppercase tracking-widest mb-8">
+                 <Award className="h-3 w-3 text-brand-orange" />
+                 Ethiopia's Leading B2B Marketplace
               </div>
-            </motion.div>
+              <h1 className="text-5xl md:text-7xl font-black text-white leading-[1.05] tracking-tight mb-8">
+                {t('home.hero.title').split(' ').map((word, i) => i === 2 ? <span key={i} className="text-brand-orange">{word} </span> : word + ' ')}
+              </h1>
+              <p className="text-xl md:text-2xl text-white/70 font-medium leading-relaxed mb-10 max-w-xl">
+                 Discover millions of business opportunities and products from verified suppliers across the region.
+              </p>
 
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative hidden lg:block"
-            >
-              <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500 via-yellow-400 to-red-500 rounded-[2rem] opacity-20 blur-lg"></div>
-              <img 
-                src="https://picsum.photos/seed/ethiopian-market/800/800" 
-                alt="Marketplace Hero" 
-                className="relative rounded-[2rem] shadow-2xl object-cover aspect-square border-4 border-white"
-                referrerPolicy="no-referrer"
-              />
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          <motion.div variants={itemVariants} className="bg-white rounded-3xl p-10 flex flex-col items-center text-center border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="h-16 w-16 bg-yellow-50 rounded-full flex items-center justify-center mb-6">
-              <ShoppingBag className="h-8 w-8 text-yellow-600" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Curated Selection</h3>
-            <p className="text-gray-600">Every product is reviewed and approved by our team.</p>
-          </motion.div>
-          <motion.div variants={itemVariants} className="bg-white rounded-3xl p-10 flex flex-col items-center text-center border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="h-16 w-16 bg-emerald-50 rounded-full flex items-center justify-center mb-6">
-              <ShieldCheck className="h-8 w-8 text-emerald-600" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Secure Purchases</h3>
-            <p className="text-gray-600">Your transactions are protected with industry-standard security.</p>
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Shop by Categories */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-10">
-          <h2 className="text-3xl font-bold text-gray-900">Shop by Categories</h2>
-        </div>
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-4"
-        >
-          {CATEGORIES.map((category) => {
-            const Icon = category.icon;
-            return (
-              <motion.div key={category.name} variants={itemVariants}>
-                <Link 
-                  to={`/explore?category=${category.name}`}
-                  className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-100 bg-white p-8 hover:border-emerald-200 hover:shadow-lg transition-all group h-full"
-                >
-                  <div className={cn("rounded-2xl p-4 transition-transform group-hover:scale-110", category.color)}>
-                    <Icon className="h-8 w-8" />
-                  </div>
-                  <span className="font-bold text-gray-900 text-center">{category.name}</span>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-      </section>
-
-      {/* Trending Products */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Trending Products</h2>
-          </div>
-          <Link to="/explore" className="text-sm font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
-            Browse All <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          {FEATURED_PRODUCTS.map((product) => (
-            <motion.div 
-              key={product.id}
-              variants={itemVariants}
-              className="group relative flex flex-col rounded-2xl border border-gray-100 bg-white p-3 transition-all hover:shadow-xl hover:border-emerald-100"
-            >
-              <Link to={`/product/${product.id}`} className="relative aspect-square overflow-hidden rounded-xl bg-gray-100 block">
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute bottom-3 left-3">
-                  <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-900 backdrop-blur-sm shadow-sm">
-                    {product.category}
-                  </span>
+              {/* Central Search Card */}
+              <div className="bg-white p-2 rounded-2xl shadow-2xl flex flex-col md:flex-row gap-2 max-w-2xl group focus-within:ring-4 focus-within:ring-brand-orange/20 transition-all">
+                <div className="flex-1 flex items-center px-4 gap-3">
+                  <Search className="h-6 w-6 text-gray-400 group-focus-within:text-brand-orange" />
+                  <input 
+                    type="text" 
+                    placeholder="Search by keywords (e.g. leather bags...)"
+                    className="w-full h-12 bg-transparent text-gray-900 font-medium focus:outline-none placeholder:text-gray-400"
+                  />
                 </div>
-              </Link>
-              <div className="mt-4 px-2 pb-2">
-                <div className="flex items-center justify-between mb-1">
-                  <Link to={`/product/${product.id}`}>
-                    <h3 className="text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition-colors line-clamp-1">{product.name}</h3>
-                  </Link>
-                  <p className="text-sm font-black text-emerald-700">{product.price} {t('product.price')}</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="flex items-center text-yellow-400">
-                    <Star className="h-3 w-3 fill-current" />
-                  </div>
-                  <span className="text-xs font-bold text-gray-900">{product.rating}</span>
-                  <span className="text-xs text-gray-400">({product.reviews} reviews)</span>
-                </div>
-                <button 
-                  onClick={() => handleAddToCart(product)}
-                  className="mt-4 w-full rounded-xl bg-gray-900 py-3 text-sm font-bold text-white transition-all hover:bg-emerald-700 active:scale-95"
-                >
-                  {t('product.addToCart')}
+                <button className="bg-brand-orange hover:bg-brand-orange-hover text-white px-10 py-4 rounded-xl font-black uppercase tracking-wider text-sm transition-all shadow-lg shadow-brand-orange/30">
+                  Search
                 </button>
               </div>
+
+              <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4 text-white/60 text-sm font-bold">
+                 <div className="flex items-center gap-2 italic">
+                    <span className="text-brand-orange">●</span> Frequently Search:
+                 </div>
+                 <Link to="/explore?category=Electronics" className="hover:text-white transition-colors">Smart Watches</Link>
+                 <Link to="/explore?category=Fashion" className="hover:text-white transition-colors">Leather Jackets</Link>
+                 <Link to="/explore?category=Home Tech" className="hover:text-white transition-colors">Solar Systems</Link>
+              </div>
             </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.2 }}
+              className="relative hidden lg:block"
+            >
+              <div className="relative rounded-[3rem] overflow-hidden border-8 border-white/5 shadow-2xl skew-y-1">
+                 <img 
+                   src="https://picsum.photos/seed/ethio-tech/800/800" 
+                   alt="Premium Products" 
+                   className="w-full h-full object-cover aspect-square"
+                 />
+                 <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/80 to-transparent"></div>
+                 <div className="absolute bottom-10 left-10 right-10">
+                    <div className="glass p-6 rounded-2xl">
+                       <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-2">Featured Supplier</p>
+                       <h3 className="text-2xl font-black text-white">EthioSmart Technology Solutions</h3>
+                       <div className="flex items-center justify-between mt-4">
+                          <div className="flex items-center gap-4">
+                             <div className="text-center">
+                                <p className="text-brand-orange font-black leading-none">12M+</p>
+                                <p className="text-[10px] text-white/40 uppercase">Exports</p>
+                             </div>
+                             <div className="h-4 w-px bg-white/20"></div>
+                             <div className="text-center">
+                                <p className="text-white font-black leading-none">Verified</p>
+                                <p className="text-[10px] text-white/40 uppercase">Gold Seller</p>
+                             </div>
+                          </div>
+                          <Link to="/explore" className="text-brand-orange font-bold text-sm hover:underline">View Shop</Link>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Grid - Minimal Utility */}
+      <section className="mx-auto max-w-[1400px] w-full px-4 -mt-12 relative z-20">
+         <div className="bg-white rounded-3xl shadow-premium border border-gray-100 p-8 md:p-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 lg:divide-x divide-gray-100">
+               {TRUST_BADGES.map((badge, i) => (
+                 <div key={i} className="p-8 group hover:bg-brand-light transition-colors cursor-default">
+                    <div className="flex items-start gap-4">
+                       <div className="h-12 w-12 rounded-xl bg-brand-orange/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                          <badge.icon className="h-6 w-6 text-brand-orange" />
+                       </div>
+                       <div>
+                          <h4 className="text-lg font-black text-gray-900 mb-1">{badge.title}</h4>
+                          <p className="text-sm text-gray-500 leading-relaxed">{badge.desc}</p>
+                       </div>
+                    </div>
+                 </div>
+               ))}
+            </div>
+         </div>
+      </section>
+
+      {/* Categories Overhaul */}
+      <section className="mx-auto max-w-[1400px] w-full px-4">
+        <div className="flex items-end justify-between mb-12">
+           <div className="max-w-xl">
+              <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-4 tracking-tighter">Shop by Category</h2>
+              <p className="text-gray-500 font-medium">Explore millions of products across our dedicated business categories.</p>
+           </div>
+           <Link to="/explore" className="hidden md:flex items-center gap-2 text-brand-orange font-black uppercase text-xs tracking-widest group">
+              Explore All <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+           </Link>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          {CATEGORIES.map((cat, i) => (
+             <motion.div 
+               key={i} 
+               whileHover={{ y: -5 }}
+               className="group cursor-pointer"
+             >
+                <Link to={`/explore?category=${cat.name}`} className="block relative h-64 rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-sm transition-all group-hover:shadow-premium group-hover:border-brand-orange/20">
+                   <div className="absolute top-8 left-8 z-10">
+                      <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110", cat.bg)}>
+                         <cat.icon className={cn("h-6 w-6", cat.color)} />
+                      </div>
+                      <h4 className="text-xl font-black text-gray-900">{cat.name}</h4>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">{cat.name === 'Electronics' ? '50k+ Products' : 'Weekly Deals'}</p>
+                   </div>
+                   <img 
+                      src={`https://picsum.photos/seed/${cat.name}/400/500`}
+                      className="absolute bottom-0 right-0 w-2/3 h-2/3 object-contain translate-x-4 translate-y-4 opacity-10 group-hover:opacity-100 transition-opacity"
+                      alt={cat.name}
+                   />
+                </Link>
+             </motion.div>
           ))}
-        </motion.div>
+        </div>
+      </section>
+
+      {/* Featured Products - Redesigned Grid */}
+      <section className="mx-auto max-w-[1400px] w-full px-4">
+         <div className="bg-white rounded-[3rem] p-8 md:p-16 border border-gray-100 shadow-premium relative overflow-hidden">
+            {/* Decoration */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-orange/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 relative z-10">
+               <div className="max-w-xl">
+                  <div className="text-brand-orange font-black uppercase text-[10px] tracking-[0.2em] mb-4">Trending Now</div>
+                  <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter">Premium Handpicked Selection</h2>
+               </div>
+               <div className="flex gap-4">
+                  <Link to="/explore" className="h-14 px-8 rounded-full bg-brand-dark text-white font-bold flex items-center gap-2 hover:bg-brand-orange transition-colors shadow-xl shadow-brand-dark/20">
+                     View All Market <ArrowRight className="h-4 w-4" />
+                  </Link>
+               </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+               {FEATURED_PRODUCTS.map((prod) => (
+                  <ProductCard key={prod.id} product={prod} />
+               ))}
+            </div>
+         </div>
+      </section>
+
+      {/* Top Suppliers Section */}
+      <section className="mx-auto max-w-[1400px] w-full px-4">
+         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1 bg-brand-orange rounded-[2.5rem] p-10 text-white flex flex-col items-start justify-center relative overflow-hidden group">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+               <Zap className="h-10 w-10 text-white/50 mb-8" />
+               <h3 className="text-4xl font-black leading-tight mb-4">Top Rated Suppliers 2026</h3>
+               <p className="text-white/80 font-medium mb-10">Connect with local verified manufacturers ready for bulk orders and customization.</p>
+               <button className="bg-white text-brand-orange px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-brand-dark hover:text-white transition-all transform hover:-translate-y-1 shadow-xl">
+                  Source Now
+               </button>
+            </div>
+            
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+               {[1, 2].map((_, i) => (
+                 <div key={i} className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm flex flex-col group hover:shadow-premium transition-all">
+                    <div className="flex items-center gap-4 mb-6">
+                       <div className="h-16 w-16 rounded-2xl bg-gray-100 overflow-hidden shrink-0 border-2 border-gray-50">
+                          <img src={`https://picsum.photos/seed/supplier-${i}/200/200`} alt="Supplier" className="w-full h-full object-cover" />
+                       </div>
+                       <div>
+                          <h4 className="text-xl font-black text-gray-900">{i === 0 ? "Unity Garments Ltd." : "TechWay Electronics"}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                             <span className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Top Seller</span>
+                             <span className="text-[10px] font-bold text-gray-400">10+ Years</span>
+                          </div>
+                       </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 mt-auto">
+                       {[1, 2, 3].map((_, j) => (
+                         <div key={j} className="aspect-square rounded-xl bg-gray-50 overflow-hidden transition-transform group-hover:scale-95 duration-500">
+                            <img src={`https://picsum.photos/seed/sprod-${i}-${j}/200/200`} alt="Prod" className="w-full h-full object-cover" />
+                         </div>
+                       ))}
+                    </div>
+                    <Link to="/explore" className="mt-8 flex items-center justify-center h-12 rounded-xl bg-brand-light text-gray-900 font-bold text-sm hover:bg-brand-dark hover:text-white transition-colors">
+                       Visit Factory
+                    </Link>
+                 </div>
+               ))}
+            </div>
+         </div>
+      </section>
+
+      {/* Newsletter / CTA */}
+      <section className="mx-auto max-w-[1400px] w-full px-4 mb-12">
+         <div className="bg-brand-dark rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[600px] bg-gradient-to-r from-brand-orange via-transparent to-brand-orange blur-[100px]"></div>
+            </div>
+            <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
+               <div className="h-20 w-px bg-gradient-to-b from-brand-orange to-transparent mb-8"></div>
+               <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-8 italic">Ready to Scale Your Business Globally?</h2>
+               <p className="text-xl text-white/60 font-medium mb-12 leading-relaxed">Join 50,000+ companies sourcing the best products from Chiricharo every day.</p>
+               <div className="flex flex-col sm:flex-row gap-4 w-full">
+                  <input 
+                    type="email" 
+                    placeholder="Enter your work email"
+                    className="flex-1 h-16 rounded-2xl bg-white/10 px-8 text-white text-lg focus:bg-white focus:text-brand-dark outline-none transition-all placeholder:text-white/30"
+                  />
+                  <button className="h-16 px-12 rounded-2xl bg-white text-brand-dark font-black uppercase tracking-widest text-sm hover:bg-brand-orange hover:text-white transition-all shadow-xl">
+                     Get Started
+                  </button>
+               </div>
+               <p className="mt-6 text-white/30 text-xs font-medium">No credit card required. Free for buyers.</p>
+            </div>
+         </div>
       </section>
     </div>
   );

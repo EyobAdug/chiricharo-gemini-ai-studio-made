@@ -1,24 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   
-  /* Ethiopian Green palette */
-  --color-emerald-50: #ecfdf5;
-  --color-emerald-100: #d1fae5;
-  --color-emerald-200: #a7f3d0;
-  --color-emerald-300: #6ee7b7;
-  --color-emerald-400: #34d399;
-  --color-emerald-500: #10b981;
-  --color-emerald-600: #059669;
-  --color-emerald-700: #047857;
-  --color-emerald-800: #065f46;
-  --color-emerald-900: #064e3b;
-  --color-emerald-950: #022c22;
+  /* Premium Brand Palette - Inspired by high-end marketplaces */
+  --color-brand-orange: #FF6600;
+  --color-brand-orange-hover: #E65C00;
+  --color-brand-dark: #0F1111;
+  --color-brand-light: #F8F9FA;
+  
+  /* Refined Emerald for status/legacy */
+  --color-brand-green: #047857;
+  --color-brand-green-light: #10b981;
+
+  /* Custom Shadows */
+  --shadow-premium: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+  --shadow-premium-hover: 0 20px 60px -12px rgba(0, 0, 0, 0.12);
+}
+
+@layer base {
+  body {
+    @apply text-[#0F1111] bg-[#F8F9FA] antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-md bg-white/70 border border-white/20;
+  }
+  
+  .luxury-gradient {
+    background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
 }
 
 .ethiopian-border {
-  height: 4px;
+  height: 3px;
   background: linear-gradient(to right, #078930 33.33%, #FCD116 33.33%, #FCD116 66.66%, #DA121A 66.66%);
 }
