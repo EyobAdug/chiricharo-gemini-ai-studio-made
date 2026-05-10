@@ -20,12 +20,20 @@ export default function Explore() {
   const { t } = useLanguage();
   const { user, profile } = useAuth();
   
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || "All");
   const [sortBy, setSortBy] = useState("featured");
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q !== null) setSearchQuery(q);
+    
+    const cat = searchParams.get('category');
+    if (cat) setSelectedCategory(cat);
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -44,14 +52,25 @@ export default function Explore() {
     fetchProducts();
   }, []);
 
-  useEffect(() => {
-    const cat = searchParams.get('category');
-    if (cat) setSelectedCategory(cat);
-  }, [searchParams]);
+  const handleCategoryChange = (cat: string) => {
+    setSelectedCategory(cat);
+    setSearchParams(prev => {
+      if (cat === "All") {
+        prev.delete('category');
+      } else {
+        prev.set('category', cat);
+      }
+      return prev;
+    });
+  };
 
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = 
+        (product.name || "").toLowerCase().includes(searchLower) ||
+        (product.description || "").toLowerCase().includes(searchLower) ||
+        (product.category || "").toLowerCase().includes(searchLower);
       const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
       return matchesSearch && matchesCategory;
     }).sort((a, b) => {
@@ -134,7 +153,7 @@ export default function Explore() {
                 {CATEGORIES.map(cat => (
                   <button
                     key={cat}
-                    onClick={() => setSelectedCategory(cat)}
+                    onClick={() => handleCategoryChange(cat)}
                     className={cn(
                       "flex items-center justify-between px-5 py-4 rounded-2xl text-sm font-bold transition-all border border-transparent",
                       selectedCategory === cat 
@@ -183,7 +202,7 @@ export default function Explore() {
                              {CATEGORIES.map(cat => (
                                <button 
                                  key={cat}
-                                 onClick={() => { setSelectedCategory(cat); setShowFiltersMobile(false); }}
+                                 onClick={() => { handleCategoryChange(cat); setShowFiltersMobile(false); }}
                                  className={cn("px-6 py-3 rounded-xl font-bold text-sm", selectedCategory === cat ? "bg-brand-orange text-white" : "bg-gray-100 text-gray-600")}
                                >
                                  {cat}

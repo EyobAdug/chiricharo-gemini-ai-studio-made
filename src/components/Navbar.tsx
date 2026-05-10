@@ -1,5 +1,5 @@
+import React, { useState, useEffect } from 'react';
 import { Search, ShoppingCart, User, Menu, X, Globe, LogOut, LayoutDashboard, Bell, MapPin, ChevronDown, HelpCircle, Store } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/src/lib/utils';
@@ -19,6 +19,27 @@ export default function Navbar() {
   const { user, profile } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
+  const [searchInput, setSearchInput] = useState('');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        const searchInputEl = document.querySelector('input[type="text"]') as HTMLInputElement;
+        if (searchInputEl) searchInputEl.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleSearch = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (searchInput.trim()) {
+      navigate(`/explore?q=${encodeURIComponent(searchInput.trim())}`);
+      setIsMenuOpen(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -105,26 +126,27 @@ export default function Navbar() {
               </span>
             </Link>
 
-            {/* Search Bar - Giant Professional */}
-            <div className="hidden md:flex flex-1 items-center max-w-2xl px-4">
+            <form onSubmit={handleSearch} className="hidden md:flex flex-1 items-center max-w-2xl px-4">
               <div className="flex w-full group">
                 <div className="relative flex-1">
                   <input
                     type="text"
                     placeholder="Search for anything (e.g. electronics, fashion...)"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
                     className="w-full h-11 rounded-l-lg border-2 border-transparent bg-white/10 px-4 pl-4 text-sm text-white placeholder:text-gray-400 focus:bg-white focus:text-gray-900 focus:outline-none focus:border-brand-orange transition-all font-medium"
-                  />
+                   />
                   <div className="absolute right-0 top-0 h-full flex items-center pr-3 pointer-events-none opacity-40">
                     <kbd className="hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border border-white/20 bg-white/10 px-1.5 font-mono text-[10px] font-medium text-white">
                       /
                     </kbd>
                   </div>
                 </div>
-                <button className="h-11 px-6 rounded-r-lg bg-brand-orange text-white font-bold hover:bg-brand-orange-hover transition-colors flex items-center gap-2">
+                <button type="submit" className="h-11 px-6 rounded-r-lg bg-brand-orange text-white font-bold hover:bg-brand-orange-hover transition-colors flex items-center gap-2">
                   <Search className="h-5 w-5" />
                 </button>
               </div>
-            </div>
+            </form>
 
             {/* Actions */}
             <div className="flex items-center gap-1 md:gap-4 shrink-0">
@@ -299,14 +321,16 @@ export default function Navbar() {
               exit={{ height: 0, opacity: 0 }}
               className="md:hidden bg-brand-dark border-t border-white/10 px-4 py-6 space-y-6 overflow-hidden"
             >
-              <div className="relative">
+              <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
                 <input
                   type="text"
                   placeholder="Search Marketplace..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                   className="w-full h-12 bg-white/10 border-none rounded-xl pl-10 pr-4 text-white text-base focus:bg-white focus:text-brand-dark focus:outline-none transition-all"
                 />
-              </div>
+              </form>
 
               <div className="space-y-4">
                 <Link to="/explore" className="flex items-center justify-between text-lg font-bold text-gray-300 hover:text-brand-orange py-2 border-b border-white/5 transition-colors">

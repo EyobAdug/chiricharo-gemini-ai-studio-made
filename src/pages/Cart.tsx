@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ShieldCheck, Truck, RotateCcw, ShoppingCart, ChevronLeft, CreditCard } from 'lucide-react';
+import { cn } from '@/src/lib/utils';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '@/src/context/CartContext';
 import { useLanguage } from '@/src/context/LanguageContext';

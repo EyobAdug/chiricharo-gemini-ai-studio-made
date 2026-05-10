@@ -7,6 +7,7 @@ import { collection, addDoc, getDoc, doc, query, where, getDocs } from 'firebase
 import { db } from '../firebase';
 import { CreditCard, MapPin, CheckCircle2, Truck, ShieldCheck, ChevronLeft, ArrowRight, Zap, Clock, Globe } from 'lucide-react';
 import { motion } from 'motion/react';
+import { cn } from '@/src/lib/utils';
 import { DELIVERY_OPTIONS, FREE_DELIVERY_THRESHOLD } from '../constants';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';

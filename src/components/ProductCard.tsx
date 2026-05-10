@@ -1,3 +1,4 @@
+import React from 'react';
 import { Star, ShoppingCart, Heart, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -6,16 +7,8 @@ import { useAuth } from '@/src/context/AuthContext';
 import { useLanguage } from '@/src/context/LanguageContext';
 
 interface ProductCardProps {
-  product: {
-    id: string | number;
-    name: string;
-    price: number;
-    rating: number;
-    reviews: number;
-    image: string;
-    category: string;
-    sellerName?: string;
-  };
+  product: any;
+  key?: any;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
